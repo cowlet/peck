@@ -1,15 +1,16 @@
 
 var chicken = {
-	direction: "",
+	direction: "west",
+	name: "Chicken E. Bok",
 	
 	print: function () {
 		if (this.direction === "west")
 		{
-			document.writeln('<"3');
+			document.writeln('<"3 ' + this.name);
 		}
 		else
 		{
-			document.writeln('E">');
+			document.writeln(this.name + ' E">');
 		}
 	}
 };
@@ -18,13 +19,18 @@ var chicken_creator = function (attributes) {
 	var c = function () {};
 	c.prototype = chicken;
 	var chick = new c();
-	chick.direction = attributes.direction;
+	chick.direction = attributes.direction || chicken.direction;
+	chick.name = attributes.name || chicken.name;
 	return chick;
 };
 
 
-var henrietta = chicken_creator( { direction: "west" } );
+//var henrietta = chicken_creator( { direction: "west", name: "Henrietta" } );
+//var henelope = chicken_creator( { direction: "east", name: "Henelope" } );
+
+var henrietta = chicken_creator( { name: "Henrietta" } );
 var henelope = chicken_creator( { direction: "east" } );
+
 
 henrietta.print();
 henelope.print();
