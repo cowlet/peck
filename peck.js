@@ -1,10 +1,6 @@
 
 var chicken = {
-	direction: "west",
-	
-	heading: function (head) {
-		this.direction = head;
-	},
+	direction: "",
 	
 	print: function () {
 		if (this.direction === "west")
@@ -18,9 +14,23 @@ var chicken = {
 	}
 };
 
-chicken.heading("west")
+var chicken_creator = function (direction) {
+	var c = function () {};
+	c.prototype = chicken;
+	var chick = new c();
+	chick.direction = direction;
+	return chick;
+};
 
-chicken.print();
+
+var henrietta = chicken_creator("west");
+var henelope = chicken_creator("east");
+
+henrietta.print();
+henelope.print();
+
+
+
 
 
 Function.prototype.method = function (name, func)
