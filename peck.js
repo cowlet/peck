@@ -14,17 +14,17 @@ var chicken = {
 	}
 };
 
-var chicken_creator = function (direction) {
+var chicken_creator = function (attributes) {
 	var c = function () {};
 	c.prototype = chicken;
 	var chick = new c();
-	chick.direction = direction;
+	chick.direction = attributes.direction;
 	return chick;
 };
 
 
-var henrietta = chicken_creator("west");
-var henelope = chicken_creator("east");
+var henrietta = chicken_creator( { direction: "west" } );
+var henelope = chicken_creator( { direction: "east" } );
 
 henrietta.print();
 henelope.print();
