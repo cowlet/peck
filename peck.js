@@ -20,21 +20,52 @@ var markov_chain = {
 	
 	next_move: function () {
 		//console.log ("In next_move, current value " + this.move);
+		var p = rand(100);
 		if (this.move === "standing")
 		{
-			// 20% peck
-			// 40% walk
-			// 20% scratch
-			// 20% bok
-			this.move = "bok";
+			if (p < 10)
+				this.move = "standing";
+			else if (p < 20)
+				this.move = "peck";
+			else if (p < 60)
+				this.move = "walk";
+			else if (p < 80)
+			    this.move = "scratch";
+			else
+			    this.move = "bok";
 		}
 		else if (this.move === "bok")
 		{
-			this.move = "standing";
+			if (p < 50)
+			    this.move = "bok";
+			else 
+			    this.move = "standing";
 		}
-	},
-	set_move: function (current_move) {
-		move = current_move;
+		else if (this.move === "peck")
+		{
+			if (p < 50)
+				this.move = "peck";
+			else if (p < 70)
+				this.move = "standing";
+			else
+			    this.move = "scratch";
+		}
+		else if (this.move === "walk")
+		{
+			if (p < 70)
+				this.move = "walk";
+			else
+			    this.move = "standing";
+		}
+		else if (this.move === "scratch")
+		{
+			if (p < 60)
+				this.move = "scratch";
+			else if (p < 80)
+				this.move = "standing";
+			else
+			    this.move = "peck";
+		}
 	}
 };
 
@@ -44,17 +75,20 @@ var chicken = {
 	y: 0,
 	direction: "west",
 	name: "Chicken E. Bok",
+	frame: 0,
 	
-	
-	draw_west_facing: function (ctx) {
+	draw_facing: function (ctx) {
 		var bodyX = this.x;
-		var bodyY = this.y;		
+		var bodyY = this.y;
+		// multiplier is pos or neg depending on direction of facing
+		// affects x offsets only
+		var m = (this.direction === "west" ? 1 : -1);
 		
 		// beak
 		ctx.fillStyle = "orange";
 		ctx.beginPath();
 		ctx.moveTo(bodyX, bodyY);
-		ctx.lineTo(bodyX-4, bodyY+4);
+		ctx.lineTo(bodyX + (-4*m), bodyY+4);
 		ctx.lineTo(bodyX, bodyY+8);
 		ctx.fill();
 		
@@ -63,74 +97,161 @@ var chicken = {
 		ctx.beginPath();
 		ctx.moveTo(bodyX, bodyY);
 		ctx.lineTo(bodyX, bodyY+16);
-		ctx.lineTo(bodyX+8, bodyY+16);
+		ctx.lineTo(bodyX + (8*m), bodyY+16);
 		ctx.fill();
 		
 		// feet
 		ctx.fillStyle = "orange";
 		ctx.beginPath();
-		ctx.moveTo(bodyX+4, bodyY+16);
-		ctx.lineTo(bodyX+2, bodyY+20);
-		ctx.lineTo(bodyX+6, bodyY+20);
+		ctx.moveTo(bodyX + (4*m), bodyY+16);
+		ctx.lineTo(bodyX + (2*m), bodyY+20);
+		ctx.lineTo(bodyX + (6*m), bodyY+20);
 		ctx.fill();
 	},
 	
-	draw_east_facing: function (ctx) {
-		var bodyX = this.x;
-		var bodyY = this.y;		
+	
+	draw_west_bok: function (ctx) {
+		this.draw_facing (ctx);
+		ctx.fillStyle = "black";
+	    ctx.font = "9px sans-serif";
+	    ctx.textBaseline = "top";
+	    ctx.fillText("bok!", this.x-24, this.y);
+	},
+	
+	draw_east_bok: function (ctx) {
+		this.draw_facing (ctx);
+		ctx.fillStyle = "black";
+	    ctx.font = "9px sans-serif";
+	    ctx.textBaseline = "top";
+	    ctx.fillText("bok!", this.x+6, this.y);
+	},
+	
+	draw_west_pecking: function (ctx) {
+		var bodyX = this.x-12;
+		var bodyY = this.y+11;
+		
+		// body
+		ctx.fillStyle = "brown"
+		ctx.beginPath();
+		ctx.moveTo(bodyX, bodyY);
+		ctx.lineTo(bodyX+12, bodyY+5);
+		ctx.lineTo(bodyX+18, bodyY);
+		ctx.fill();
 		
 		// beak
 		ctx.fillStyle = "orange";
 		ctx.beginPath();
 		ctx.moveTo(bodyX, bodyY);
-		ctx.lineTo(bodyX+4, bodyY+4);
-		ctx.lineTo(bodyX, bodyY+8);
-		ctx.fill();
-		
-		// body		
-		ctx.fillStyle = "brown"
-		ctx.beginPath();
-		ctx.moveTo(bodyX, bodyY);
-		ctx.lineTo(bodyX, bodyY+16);
-		ctx.lineTo(bodyX-8, bodyY+16);
+		ctx.lineTo(bodyX+3, bodyY+8);
+		ctx.lineTo(bodyX+6, bodyY+3);
 		ctx.fill();
 		
 		// feet
 		ctx.fillStyle = "orange";
 		ctx.beginPath();
-		ctx.moveTo(bodyX-4, bodyY+16);
-		ctx.lineTo(bodyX-2, bodyY+20);
-		ctx.lineTo(bodyX-6, bodyY+20);
+		ctx.moveTo(bodyX+15, this.y+16);
+		ctx.lineTo(bodyX+13, this.y+20);
+		ctx.lineTo(bodyX+17, this.y+20);
 		ctx.fill();
 	},
 	
-	draw: function (ctx) {
+	draw_east_pecking: function (ctx) {
+		var bodyX = this.x+12;
+		var bodyY = this.y+11;
 		
-		if (this.behaviour.move === "standing" ||
-		    this.behaviour.move === "bok")
+		// body
+		ctx.fillStyle = "brown"
+		ctx.beginPath();
+		ctx.moveTo(bodyX, bodyY);
+		ctx.lineTo(bodyX-12, bodyY+5);
+		ctx.lineTo(bodyX-18, bodyY);
+		ctx.fill();
+		
+		// beak
+		ctx.fillStyle = "orange";
+		ctx.beginPath();
+		ctx.moveTo(bodyX, bodyY);
+		ctx.lineTo(bodyX-3, bodyY+8);
+		ctx.lineTo(bodyX-6, bodyY+3);
+		ctx.fill();
+		
+		// feet
+		ctx.fillStyle = "orange";
+		ctx.beginPath();
+		ctx.moveTo(bodyX-15, this.y+16);
+		ctx.lineTo(bodyX-13, this.y+20);
+		ctx.lineTo(bodyX-17, this.y+20);
+		ctx.fill();
+	},
+	
+	select_frame: function (ctx, move, direction, frame) {
+		console.log ("Selecting frame for " + move + ", " + direction + ", " +frame);
+		if (direction === "west")
 		{
-		
-			if (this.direction === "west")
+			if (frame === 0)
 			{
-				this.draw_west_facing(ctx);
+				if (move === "standing")
+				    this.draw_facing(ctx);
+				else if (move === "peck")
+				    this.draw_west_pecking(ctx);
+				else if (move === "bok")
+				    this.draw_west_bok(ctx);
+				
+				//TODO else if (move === "walk")
+				//TODO else if (move === "scratch")
 			}
 			else
 			{
-				this.draw_east_facing(ctx);
+				if (move === "scratch")
+				{
+					// TODO
+				}
+				else
+				    this.draw_facing(ctx);
+				// standing, peck, walk, bok all have the same off frame
 			}
-	    
-		    ctx.fillStyle = "black";
-		    ctx.font = "9px sans-serif";
-		    ctx.textBaseline = "top";
-		    ctx.fillText(this.name, this.x, this.y+22);
 		}
-		if (this.behaviour.move === "bok")
-	    {
-			ctx.fillStyle = "black";
-		    ctx.font = "9px sans-serif";
-		    ctx.textBaseline = "top";
-		    ctx.fillText("bok!", this.x+6, this.y);
+		else
+		{
+			if (frame === 0)
+			{
+				if (move === "standing")
+				    this.draw_facing(ctx);
+				else if (move === "peck")
+				    this.draw_east_pecking(ctx);
+				else if (move === "bok")
+				    this.draw_east_bok(ctx);
+				
+				//TODO else if (move === "walk")
+				//TODO else if (move === "scratch")
+			}
+			else
+			{
+				if (move === "scratch")
+				{
+					// TODO
+				}
+				else
+				    this.draw_facing(ctx);
+				// standing, peck, walk, bok all have the same off frame
+			}
 		}
+	},
+	
+	draw: function (ctx) {
+		console.log ("Drawing move " + this.behaviour.move);
+		
+		this.select_frame(ctx, this.behaviour.move, this.direction, this.frame);		
+		
+		ctx.fillStyle = "black";
+	    ctx.font = "9px sans-serif";
+	    ctx.textBaseline = "top";
+	    ctx.fillText(this.name, this.x, this.y+22);
+	},
+	
+	update: function () {
+		this.behaviour.next_move ();
+		this.frame ? this.frame = 0 : this.frame = 1;
 	}
 	
 };
@@ -150,6 +271,8 @@ var make_direction = function () {
 	return (rand(1) ? "west" : "east");
 }
 
+var count = 0;
+
 var game_loop = function (ctx, coop) {
 			
 	ctx.fillStyle = "rgb(249,238,137)";
@@ -158,11 +281,37 @@ var game_loop = function (ctx, coop) {
 	for (i = 0; i < coop.length; i += 1)
 	{
 		coop[i].draw (ctx);
-		coop[i].behaviour.next_move();
+		coop[i].update();
 	}
 	
-	//var t = setTimeout(function () { game_loop(ctx, coop); }, 1000);
-	var t = setTimeout(game_loop, 1000, ctx, coop);
+	count += 1;
+	if (count < 3)
+	    var t = setTimeout(game_loop, 1000, ctx, coop);
+};
+
+var test_loop = function (ctx, coop) {
+			
+	ctx.fillStyle = "rgb(249,238,137)";
+    ctx.fillRect(0, 0, YARD_WIDTH, YARD_HEIGHT);
+    
+	coop[0].x = 300;
+	coop[0].y = 150;
+	coop[0].direction = "east";
+	coop[0].behaviour.move = "standing";
+	coop[0].draw(ctx);
+	var t = setTimeout(test, 1000, ctx, coop);
+	
+};
+
+var test2 = function (ctx, coop) {
+	ctx.fillStyle = "rgb(249,238,137)";
+    ctx.fillRect(0, 0, YARD_WIDTH, YARD_HEIGHT);
+    
+	coop[0].x = 300;
+	coop[0].y = 150;
+	coop[0].direction = "east";
+	coop[0].behaviour.move = "peck";
+	coop[0].draw(ctx);
 };
 
 
