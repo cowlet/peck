@@ -110,138 +110,77 @@ var chicken = {
 	},
 	
 	
-	draw_west_bok: function (ctx) {
+	draw_bokking: function (ctx) {
 		this.draw_facing (ctx);
 		ctx.fillStyle = "black";
 	    ctx.font = "9px sans-serif";
 	    ctx.textBaseline = "top";
-	    ctx.fillText("bok!", this.x-24, this.y);
+
+	    var xpos = (this.direction === "west" ? this.x-24 : this.x+6);
+	    ctx.fillText("bok!", xpos, this.y);
 	},
 	
-	draw_east_bok: function (ctx) {
-		this.draw_facing (ctx);
-		ctx.fillStyle = "black";
-	    ctx.font = "9px sans-serif";
-	    ctx.textBaseline = "top";
-	    ctx.fillText("bok!", this.x+6, this.y);
-	},
-	
-	draw_west_pecking: function (ctx) {
+	draw_pecking: function (ctx) {
 		var bodyX = this.x-12;
 		var bodyY = this.y+11;
+		var m = (this.direction === "west" ? 1 : -1);
 		
 		// body
 		ctx.fillStyle = "brown"
 		ctx.beginPath();
 		ctx.moveTo(bodyX, bodyY);
-		ctx.lineTo(bodyX+12, bodyY+5);
-		ctx.lineTo(bodyX+18, bodyY);
+		ctx.lineTo(bodyX + (12*m), bodyY+5);
+		ctx.lineTo(bodyX + (18*m), bodyY);
 		ctx.fill();
 		
 		// beak
 		ctx.fillStyle = "orange";
 		ctx.beginPath();
 		ctx.moveTo(bodyX, bodyY);
-		ctx.lineTo(bodyX+3, bodyY+8);
-		ctx.lineTo(bodyX+6, bodyY+3);
+		ctx.lineTo(bodyX + (3*m), bodyY+8);
+		ctx.lineTo(bodyX + (6*m), bodyY+3);
 		ctx.fill();
 		
 		// feet
 		ctx.fillStyle = "orange";
 		ctx.beginPath();
-		ctx.moveTo(bodyX+15, this.y+16);
-		ctx.lineTo(bodyX+13, this.y+20);
-		ctx.lineTo(bodyX+17, this.y+20);
+		ctx.moveTo(bodyX + (15*m), this.y+16);
+		ctx.lineTo(bodyX + (13*m), this.y+20);
+		ctx.lineTo(bodyX + (17*m), this.y+20);
 		ctx.fill();
 	},
 	
-	draw_east_pecking: function (ctx) {
-		var bodyX = this.x+12;
-		var bodyY = this.y+11;
-		
-		// body
-		ctx.fillStyle = "brown"
-		ctx.beginPath();
-		ctx.moveTo(bodyX, bodyY);
-		ctx.lineTo(bodyX-12, bodyY+5);
-		ctx.lineTo(bodyX-18, bodyY);
-		ctx.fill();
-		
-		// beak
-		ctx.fillStyle = "orange";
-		ctx.beginPath();
-		ctx.moveTo(bodyX, bodyY);
-		ctx.lineTo(bodyX-3, bodyY+8);
-		ctx.lineTo(bodyX-6, bodyY+3);
-		ctx.fill();
-		
-		// feet
-		ctx.fillStyle = "orange";
-		ctx.beginPath();
-		ctx.moveTo(bodyX-15, this.y+16);
-		ctx.lineTo(bodyX-13, this.y+20);
-		ctx.lineTo(bodyX-17, this.y+20);
-		ctx.fill();
-	},
 	
-	select_frame: function (ctx, move, direction, frame) {
-		console.log ("Selecting frame for " + move + ", " + direction + ", " +frame);
-		if (direction === "west")
+	select_frame: function (ctx, move, frame) {
+		console.log ("Selecting frame for " + move + ", " +frame);
+		if (frame === 0)
 		{
-			if (frame === 0)
-			{
-				if (move === "standing")
-				    this.draw_facing(ctx);
-				else if (move === "peck")
-				    this.draw_west_pecking(ctx);
-				else if (move === "bok")
-				    this.draw_west_bok(ctx);
-				
-				//TODO else if (move === "walk")
-				//TODO else if (move === "scratch")
-			}
-			else
-			{
-				if (move === "scratch")
-				{
-					// TODO
-				}
-				else
-				    this.draw_facing(ctx);
-				// standing, peck, walk, bok all have the same off frame
-			}
+			if (move === "standing")
+			    this.draw_facing(ctx);
+			else if (move === "peck")
+			    this.draw_pecking(ctx);
+			else if (move === "bok")
+			    this.draw_bokking(ctx);
+			
+			//TODO else if (move === "walk")
+			//TODO else if (move === "scratch")
 		}
 		else
 		{
-			if (frame === 0)
+			if (move === "scratch")
 			{
-				if (move === "standing")
-				    this.draw_facing(ctx);
-				else if (move === "peck")
-				    this.draw_east_pecking(ctx);
-				else if (move === "bok")
-				    this.draw_east_bok(ctx);
-				
-				//TODO else if (move === "walk")
-				//TODO else if (move === "scratch")
+				// TODO
 			}
 			else
-			{
-				if (move === "scratch")
-				{
-					// TODO
-				}
-				else
-				    this.draw_facing(ctx);
-				// standing, peck, walk, bok all have the same off frame
-			}
+			    this.draw_facing(ctx);
+			// standing, peck, walk, bok all have the same off frame
 		}
 	},
 	
 	draw: function (ctx) {
 		console.log ("Drawing move " + this.behaviour.move);
 		
-		this.select_frame(ctx, this.behaviour.move, this.direction, this.frame);		
+		this.select_frame(ctx, this.behaviour.move, this.frame);		
 		
 		ctx.fillStyle = "black";
 	    ctx.font = "9px sans-serif";
