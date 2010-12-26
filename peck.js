@@ -121,9 +121,9 @@ var chicken = {
 	},
 	
 	draw_pecking: function (ctx) {
-		var bodyX = this.x-12;
-		var bodyY = this.y+11;
 		var m = (this.direction === "west" ? 1 : -1);
+		var bodyX = this.x - (12*m);
+		var bodyY = this.y+11;
 		
 		// body
 		ctx.fillStyle = "brown"
@@ -150,6 +150,92 @@ var chicken = {
 		ctx.fill();
 	},
 	
+	draw_walking: function (ctx) {
+		var bodyX = this.x;
+		var bodyY = this.y;
+		var m = (this.direction === "west" ? 1 : -1);
+		
+		// beak
+		ctx.fillStyle = "orange";
+		ctx.beginPath();
+		ctx.moveTo(bodyX, bodyY);
+		ctx.lineTo(bodyX + (-4*m), bodyY+4);
+		ctx.lineTo(bodyX, bodyY+8);
+		ctx.fill();
+		
+		// body		
+		ctx.fillStyle = "brown"
+		ctx.beginPath();
+		ctx.moveTo(bodyX, bodyY);
+		ctx.lineTo(bodyX, bodyY+16);
+		ctx.lineTo(bodyX + (8*m), bodyY+16);
+		ctx.fill();
+		
+		// feet
+		ctx.fillStyle = "orange";
+		ctx.beginPath();
+		ctx.moveTo(bodyX + (2*m), bodyY+16);
+		ctx.lineTo(bodyX + (1*m), bodyY+20);
+		ctx.lineTo(bodyX + (3*m), bodyY+20);
+		ctx.fill();
+		ctx.beginPath();
+		ctx.moveTo(bodyX + (5*m), bodyY+16);
+		ctx.lineTo(bodyX + (4*m), bodyY+20);
+		ctx.lineTo(bodyX + (6*m), bodyY+20);
+		ctx.fill();
+	},
+		
+	
+	draw_scratching: function (ctx, frame) {
+		var m = (this.direction === "west" ? 1 : -1);
+		var bodyX = this.x - (8*m);
+		var bodyY = this.y+8;
+		
+		// body
+		ctx.fillStyle = "brown"
+		ctx.beginPath();
+		ctx.moveTo(bodyX, bodyY);
+		ctx.lineTo(bodyX + (10*m), bodyY+8);
+		ctx.lineTo(bodyX + (18*m), bodyY+5);
+		ctx.fill();
+		
+		// beak
+		ctx.fillStyle = "orange";
+		ctx.beginPath();
+		ctx.moveTo(bodyX, bodyY);
+		ctx.lineTo(bodyX + (3*m), bodyY+8);
+		ctx.lineTo(bodyX + (6*m), bodyY+3);
+		ctx.fill();
+		
+		// feet
+		ctx.fillStyle = "orange";
+		ctx.beginPath();
+		if (frame === 0)
+		{
+			ctx.moveTo(bodyX + (13*m), this.y+16);
+			ctx.lineTo(bodyX + (11*m), this.y+20);
+			ctx.lineTo(bodyX + (15*m), this.y+20);
+			ctx.fill();
+		}
+		else
+		{
+			ctx.moveTo(bodyX + (13*m), this.y+16);
+			ctx.lineTo(bodyX + (11*m), this.y+20);
+			ctx.lineTo(bodyX + (13*m), this.y+20);
+			ctx.fill();
+			ctx.beginPath();
+			ctx.moveTo(bodyX + (13*m), this.y+16);
+			ctx.lineTo(bodyX + (17*m), this.y+18);
+			ctx.lineTo(bodyX + (18*m), this.y+16);
+			ctx.fill();
+		}
+	},
+	
+	update_position: function () {
+	    // update x coordinate
+	    this.x += (this.direction === "west" ? -1 : 1);
+	},
+	
 	
 	select_frame: function (ctx, move, frame) {
 		console.log ("Selecting frame for " + move + ", " +frame);
@@ -161,16 +247,15 @@ var chicken = {
 			    this.draw_pecking(ctx);
 			else if (move === "bok")
 			    this.draw_bokking(ctx);
-			
-			//TODO else if (move === "walk")
-			//TODO else if (move === "scratch")
+			else if (move === "walk")
+			    this.draw_walking(ctx);
+            else if (move === "scratch")
+                this.draw_scratching(ctx, frame);
 		}
 		else
 		{
 			if (move === "scratch")
-			{
-				// TODO
-			}
+                this.draw_scratching(ctx, frame);
 			else
 			    this.draw_facing(ctx);
 			// standing, peck, walk, bok all have the same off frame
@@ -191,6 +276,8 @@ var chicken = {
 	update: function () {
 		this.behaviour.next_move ();
 		this.frame ? this.frame = 0 : this.frame = 1;
+		if (this.behaviour.move === "walk")
+		    this.update_position();
 	}
 	
 };
@@ -224,7 +311,7 @@ var game_loop = function (ctx, coop) {
 	}
 	
 	count += 1;
-	if (count < 3)
+	//if (count < 3)
 	    var t = setTimeout(game_loop, 1000, ctx, coop);
 };
 
@@ -236,9 +323,9 @@ var test_loop = function (ctx, coop) {
 	coop[0].x = 300;
 	coop[0].y = 150;
 	coop[0].direction = "east";
-	coop[0].behaviour.move = "standing";
+	coop[0].behaviour.move = "scratch";
 	coop[0].draw(ctx);
-	var t = setTimeout(test, 1000, ctx, coop);
+	var t = setTimeout(test2, 1000, ctx, coop);
 	
 };
 
@@ -249,7 +336,8 @@ var test2 = function (ctx, coop) {
 	coop[0].x = 300;
 	coop[0].y = 150;
 	coop[0].direction = "east";
-	coop[0].behaviour.move = "peck";
+	coop[0].behaviour.move = "scratch";
+	coop[0].frame = 1;
 	coop[0].draw(ctx);
 };
 
@@ -264,5 +352,6 @@ var setup = function () {
     var ctx = canvas.getContext("2d");
 
     game_loop (ctx, coop);
+    //test_loop (ctx, coop);
 };	
 
