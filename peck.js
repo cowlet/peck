@@ -233,7 +233,7 @@ var chicken = {
 	
 	update_position: function () {
 	    // update x coordinate
-	    this.x += (this.direction === "west" ? -1 : 1);
+	    this.x += (this.direction === "west" ? -10 : 10);
 	},
 	
 	
@@ -274,6 +274,9 @@ var chicken = {
 	},
 	
 	update: function () {
+		if (rand(10))
+			this.direction = this.direction === "west" ? "east" : "west";
+		
 		this.behaviour.next_move ();
 		this.frame ? this.frame = 0 : this.frame = 1;
 		if (this.behaviour.move === "walk")
