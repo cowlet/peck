@@ -24,16 +24,24 @@ var chicken_creator = function (attributes) {
 	return chick;
 };
 
+var rand = function (max) {
+    return Math.floor(Math.random() * (max + 1));
+}
 
-//var henrietta = chicken_creator( { direction: "west", name: "Henrietta" } );
-//var henelope = chicken_creator( { direction: "east", name: "Henelope" } );
-
-var henrietta = chicken_creator( { name: "Henrietta" } );
-var henelope = chicken_creator( { direction: "east" } );
+var make_direction = function () {
+	return (rand(1) ? "west" : "east");
+}
 
 
-henrietta.print();
-henelope.print();
+var coop = [chicken_creator( { name: "Henrietta", direction: make_direction() } ),
+            chicken_creator( { name: "Henelope", direction: make_direction() } ),
+            chicken_creator( { name: "Hentick", direction: make_direction() } ) ];
+
+
+for (i = 0; i < coop.length; i += 1)
+{
+	coop[i].print ();
+}
 
 
 
