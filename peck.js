@@ -75,6 +75,51 @@ var make_heading = function () {
 }
 
 
+var grain = {
+	x: 0,
+	y: 0,
+	
+	draw: function (ctx) {
+		ctx.fillStyle = "brown"
+		ctx.beginPath();
+		ctx.moveTo(this.x, this.y);
+		ctx.lineTo(this.x+1, this.y);
+		ctx.lineTo(this.x+1, this.y+1);
+		ctx.lineTo(this.x, this.y+1);
+		ctx.fill();
+	}
+}
+
+var generate_grain = function (x, y) {
+	var g = Object.beget(grain);
+	g.x = x || grain.x;
+	g.y = y || grain.y;
+	return g;
+};
+
+var dropGrain = function (position) {
+	// position has x and y, which is the centre of the 10x10 grain drop
+	var startX = position.x - 5;
+	var startY = position.y - 5;
+	
+	var canvas = document.getElementById("canvas");
+    var ctx = canvas.getContext("2d");
+	
+	// drop 10 bits of grain
+	var grains = []
+	for (var i = 0; i < 10; i += 1)
+	{
+		grains.push (generate_grain(startX+rand(10), startY+rand(10)));
+	}
+	
+	for (var i = 0; i < 10; i += 1)
+	{
+		grains[i].draw(ctx);
+	}
+}
+
+
+
 
 var chicken = {
 	x: 0,
@@ -357,7 +402,7 @@ var peckOnClick = function (e) {
     }
 
     console.log ("Dropping grain at (" + position.x + "," + position.y + ")");
-    //dropGrain();
+    dropGrain(position);
 }
 
 
