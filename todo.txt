@@ -1,10 +1,12 @@
 + direction should be north and south as well as east and west
 
-- drop grain
++ drop grain
 	+ need to make a "yard" object that knows what's in it
 	+ draw everything in the yard every game step
-	- adding grain to yard provokes chickens
-- change chicken behaviour to follow grain
+	+ adding grain to yard provokes chickens
++ change chicken behaviour to follow grain
+
+- make chickens move away from each other?
 
 - make a fence
 - check bounds before moving chicken
