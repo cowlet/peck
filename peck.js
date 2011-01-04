@@ -1,5 +1,3 @@
-var YARD_WIDTH = 500;
-var YARD_HEIGHT = 300;
 
 var rand = function (max) {
     return Math.floor(Math.random() * (max + 1));
@@ -13,8 +11,92 @@ if (typeof Object.beget !== 'function') {
      };
 }
 
+// The yard is the object that holds all the chickens, grain, etc and can draw the screen
+var yard = {
+	width: 500,
+	height: 300,
+	ctx: undefined,
+	chickens: [],
+	objects: [],
+	grains: [],
+	
+	set_ctx: function (ctx) {
+		this.ctx = ctx;
+	},
+	
+	add_chicken: function (c) {
+		this.chickens.push (c);
+	},
+	
+	add_object: function (o) {
+		this.objects.push (o);
+	},
+	
+	add_grain: function (g) {
+		this.grains.push (g);
+	},
+	
+	draw: function () {
+		var i;
+		
+		this.ctx.fillStyle = "rgb(249,238,137)";
+	    this.ctx.fillRect(0, 0, this.width, this.height);
+		
+		for (i = 0; i < this.chickens.length; i += 1)
+		{
+			this.chickens[i].draw (this.ctx);
+		}
+		for (i = 0; i < this.objects.length; i += 1)
+		{
+			this.objects[i].draw (this.ctx);
+		}
+		for (i = 0; i < this.grains.length; i += 1)
+		{
+			this.grains[i].draw (this.ctx);
+		}
+	}
+}
 
 
+// Grain is a placable and eatable object, dropped in a user-generated grain drop
+var grain = {
+	x: 0,
+	y: 0,
+	
+	draw: function (ctx) {
+		ctx.fillStyle = "brown"
+		ctx.beginPath();
+		ctx.moveTo(this.x, this.y);
+		ctx.lineTo(this.x+1, this.y);
+		ctx.lineTo(this.x+1, this.y+1);
+		ctx.lineTo(this.x, this.y+1);
+		ctx.fill();
+	}
+}
+
+var generate_grain = function (x, y) {
+	var g = Object.beget(grain);
+	g.x = x || grain.x;
+	g.y = y || grain.y;
+	return g;
+};
+
+var dropGrain = function (position) {
+	// position has x and y, which is the centre of the 10x10 grain drop
+	var startX = position.x - 5;
+	var startY = position.y - 5;
+	
+	// drop 10 bits of grain
+	for (var i = 0; i < 10; i += 1)
+	{
+		yard.add_grain (generate_grain(startX+rand(10), startY+rand(10)));
+	}
+	yard.draw();
+}
+
+
+// *** Chicken-related items ***
+// Chicken behaviours: markov_chain for normal activities, chase behaviour for grain
 var markov_chain = {
 	move: "standing",
 	
@@ -69,63 +151,16 @@ var markov_chain = {
 	}
 };
 
-
+// Chicken helper functions
 var make_heading = function () {
 	return rand(360);
 }
 
-
-var grain = {
-	x: 0,
-	y: 0,
-	
-	draw: function (ctx) {
-		ctx.fillStyle = "brown"
-		ctx.beginPath();
-		ctx.moveTo(this.x, this.y);
-		ctx.lineTo(this.x+1, this.y);
-		ctx.lineTo(this.x+1, this.y+1);
-		ctx.lineTo(this.x, this.y+1);
-		ctx.fill();
-	}
-}
-
-var generate_grain = function (x, y) {
-	var g = Object.beget(grain);
-	g.x = x || grain.x;
-	g.y = y || grain.y;
-	return g;
-};
-
-var dropGrain = function (position) {
-	// position has x and y, which is the centre of the 10x10 grain drop
-	var startX = position.x - 5;
-	var startY = position.y - 5;
-	
-	var canvas = document.getElementById("canvas");
-    var ctx = canvas.getContext("2d");
-	
-	// drop 10 bits of grain
-	var grains = []
-	for (var i = 0; i < 10; i += 1)
-	{
-		grains.push (generate_grain(startX+rand(10), startY+rand(10)));
-	}
-	
-	for (var i = 0; i < 10; i += 1)
-	{
-		grains[i].draw(ctx);
-	}
-}
-
-
-
-
+// Chicken object
 var chicken = {
 	x: 0,
 	y: 0,
 	heading: 270,
-	//direction: "west",
 	name: "Chicken E. Bok",
 	frame: 0,
 	
@@ -356,8 +391,8 @@ var chicken_creator = function (attributes) {
 	chick.heading = attributes.heading || chicken.heading;
 	chick.behaviour = Object.beget(markov_chain);
 	chick.name = attributes.name || chicken.name;
-	chick.x = rand(YARD_WIDTH) || chicken.x;
-	chick.y = rand(YARD_HEIGHT) || chicken.y;
+	chick.x = rand(yard.width) || chicken.x;
+	chick.y = rand(yard.height) || chicken.y;
 	return chick;
 };
 
@@ -385,7 +420,7 @@ var getCursorPosition = function (e) {
     //x -= xOrigin;
     //y -= yOrigin;
 
-    if (x < 0 || y < 0 || x > YARD_WIDTH || y > YARD_HEIGHT)
+    if (x < 0 || y < 0 || x > yard.width || y > yard.height)
     {
         console.log("Out of bounds (" + x + "," + y + ")");
         return undefined;
@@ -406,30 +441,27 @@ var peckOnClick = function (e) {
 }
 
 
+// *** Game loops ***
 
 // game_loop prints and updates the full coop
-var game_loop = function (ctx, coop) {
-			
-	ctx.fillStyle = "rgb(249,238,137)";
-    ctx.fillRect(0, 0, YARD_WIDTH, YARD_HEIGHT);
+var game_loop = function (ctx) {
     
 	for (i = 0; i < coop.length; i += 1)
 	{
-		coop[i].draw (ctx);
 		coop[i].update();
 	}
+	
+	yard.draw();
 	
 	var t = setTimeout(game_loop, 1000, ctx, coop);
 };
 
 // test_loop loops indefinitely with only one chicken
-var test_loop = function (ctx, coop) {
-				
-	ctx.fillStyle = "rgb(249,238,137)";
-    ctx.fillRect(0, 0, YARD_WIDTH, YARD_HEIGHT);
+var test_loop = function (ctx) {
     
-	coop[0].draw (ctx);
-	coop[0].update();
+	test_coop[0].update();
+	
+	yard.draw();
 	
 	var t = setTimeout(test_loop, 1000, ctx, coop);
 	
@@ -441,7 +473,7 @@ var test1 = function (ctx, coop) {
 	// standing, peck, bok, walk, scratch
 			
 	ctx.fillStyle = "rgb(249,238,137)";
-    ctx.fillRect(0, 0, YARD_WIDTH, YARD_HEIGHT);
+    ctx.fillRect(0, 0, yard.width, yard.height);
     
 	coop[0].x = 300;
 	coop[0].y = 150;
@@ -454,7 +486,7 @@ var test1 = function (ctx, coop) {
 
 var test2 = function (ctx, coop) {
 	ctx.fillStyle = "rgb(249,238,137)";
-    ctx.fillRect(0, 0, YARD_WIDTH, YARD_HEIGHT);
+    ctx.fillRect(0, 0, yard.width, yard.height);
     
 	coop[0].x = 300;
 	coop[0].y = 150;
@@ -470,12 +502,29 @@ var coop = [chicken_creator( { name: "Henrietta", heading: make_heading() } ),
             chicken_creator( { name: "Henderson", heading: make_heading() } ),
             chicken_creator( { name: "Hentick", heading: make_heading() } ) ];
 
+var test_coop = [chicken_creator( { name: "Henrietta", heading: make_heading() } )];
+
+
+// *** Starting point ***
+
 var setup = function () {
 
 	var canvas = document.getElementById("canvas");
     var ctx = canvas.getContext("2d");
 
+	yard.set_ctx(ctx);
+
     canvas.addEventListener("click", peckOnClick, false);
+
+	//for (i = 0; i < coop.length; i += 1)
+	//{
+	//	yard.add_chicken(coop[i]);
+	//}
+	
+	for (i = 0; i < test_coop.length; i += 1)
+	{
+		yard.add_chicken(test_coop[i]);
+	}
 
     //game_loop (ctx, coop);
     //test1 (ctx, coop); // single step
