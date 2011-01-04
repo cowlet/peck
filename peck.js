@@ -82,6 +82,10 @@ var chicken = {
 		return (this.heading < 180 ? "east" : "west");
 	},
 	
+	rad_heading: function () {
+		return this.heading * Math.PI / 180;
+	},
+	
 	draw_facing: function (ctx) {
 		var bodyX = this.x;
 		var bodyY = this.y;
@@ -237,8 +241,12 @@ var chicken = {
 	},
 	
 	update_position: function () {
-	    // update x coordinate
-	    this.x += (this.direction() === "west" ? -10 : 10);
+		
+		console.log (this.name + " is currently at (" + this.x + "," + this.y + ") heading " + this.heading);
+		// chickens move 10 pix
+		this.x += 10 * Math.sin(this.rad_heading());
+		this.y -= 10 * Math.cos(this.rad_heading());
+		console.log (this.name + " is now at (" + this.x + "," + this.y + ")");
 	},
 	
 	
@@ -279,10 +287,10 @@ var chicken = {
 	},
 	
 	update: function () {
-		console.log("heading for " + this.name + " was " + this.heading);
-		if (!rand(5)) // 1 in 5 times, change direction
-			this.heading += (this.direction() === "west" ? -180 : 180);
-		console.log("heading for " + this.name + " is now " + this.heading);
+		//console.log("heading for " + this.name + " was " + this.heading);
+		//if (!rand(5)) // 1 in 5 times, change direction
+		//	this.heading += (this.direction() === "west" ? -180 : 180);
+		//console.log("heading for " + this.name + " is now " + this.heading);
 		
 		this.behaviour.next_move ();
 		this.frame ? this.frame = 0 : this.frame = 1;
@@ -304,7 +312,7 @@ var chicken_creator = function (attributes) {
 
 
 var make_heading = function () {
-	return (rand(1) ? 270 : 90);
+	return rand(360);
 }
 
 
@@ -343,8 +351,8 @@ var test1 = function (ctx, coop) {
     
 	coop[0].x = 300;
 	coop[0].y = 150;
-	coop[0].heading = 90;
-	coop[0].behaviour.move = "standing";
+	coop[0].heading = 240;
+	coop[0].behaviour.move = "walk";
 	coop[0].draw(ctx);
 	var t = setTimeout(test2, 1000, ctx, coop);
 	
@@ -356,25 +364,25 @@ var test2 = function (ctx, coop) {
     
 	coop[0].x = 300;
 	coop[0].y = 150;
-	coop[0].heading = 90;
-	coop[0].behaviour.move = "standing";
+	coop[0].heading = 240;
+	coop[0].behaviour.move = "walk";
+	coop[0].update_position();
 	coop[0].frame = 1;
 	coop[0].draw(ctx);
 };
 
-
+var coop = [chicken_creator( { name: "Henrietta", heading: make_heading() } ),
+            chicken_creator( { name: "Henelope", heading: make_heading() } ),
+            chicken_creator( { name: "Henderson", heading: make_heading() } ),
+            chicken_creator( { name: "Hentick", heading: make_heading() } ) ];
 
 var setup = function () {
-	var coop = [chicken_creator( { name: "Henrietta", heading: make_heading() } ),
-	            chicken_creator( { name: "Henelope", heading: make_heading() } ),
-	            chicken_creator( { name: "Henderson", heading: make_heading() } ),
-	            chicken_creator( { name: "Hentick", heading: make_heading() } ) ];
 
 	var canvas = document.getElementById("canvas");
     var ctx = canvas.getContext("2d");
 
     //game_loop (ctx, coop);
-    //test1 (ctx, coop); // single step
-    test_loop (ctx, coop);
+    test1 (ctx, coop); // single step
+    //test_loop (ctx, coop);
 };	
 

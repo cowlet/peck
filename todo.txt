@@ -1,14 +1,14 @@
 - direction should be north and south as well as east and west
 
+- drop grain
+- change chicken behaviour to follow grain
+
 - make a fence
 - check bounds before moving chicken
 
 - make a farmyard object that has fence, houses, chickens in and can check bounds and collisions?
 
 - fix the game loop
-
-- drop grain
-- change chicken behaviour to follow grain
 
 - change chicken colours
 - three frame animations (animation queue?)
