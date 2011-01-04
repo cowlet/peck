@@ -70,6 +70,12 @@ var markov_chain = {
 };
 
 
+var make_heading = function () {
+	return rand(360);
+}
+
+
+
 var chicken = {
 	x: 0,
 	y: 0,
@@ -242,11 +248,11 @@ var chicken = {
 	
 	update_position: function () {
 		
-		console.log (this.name + " is currently at (" + this.x + "," + this.y + ") heading " + this.heading);
+		//console.log (this.name + " is currently at (" + this.x + "," + this.y + ") heading " + this.heading);
 		// chickens move 10 pix
 		this.x += 10 * Math.sin(this.rad_heading());
 		this.y -= 10 * Math.cos(this.rad_heading());
-		console.log (this.name + " is now at (" + this.x + "," + this.y + ")");
+		//console.log (this.name + " is now at (" + this.x + "," + this.y + ")");
 	},
 	
 	
@@ -276,7 +282,7 @@ var chicken = {
 	},
 	
 	draw: function (ctx) {
-		console.log ("Drawing move " + this.behaviour.move);
+		//console.log ("Drawing move " + this.behaviour.move);
 		
 		this.select_frame(ctx, this.behaviour.move, this.frame);		
 		
@@ -287,10 +293,10 @@ var chicken = {
 	},
 	
 	update: function () {
-		//console.log("heading for " + this.name + " was " + this.heading);
-		//if (!rand(5)) // 1 in 5 times, change direction
-		//	this.heading += (this.direction() === "west" ? -180 : 180);
-		//console.log("heading for " + this.name + " is now " + this.heading);
+		console.log("heading for " + this.name + " was " + this.heading);
+		if (!rand(5)) // 1 in 5 times, change direction
+			this.heading = make_heading();
+		console.log("heading for " + this.name + " is now " + this.heading);
 		
 		this.behaviour.next_move ();
 		this.frame ? this.frame = 0 : this.frame = 1;
@@ -309,11 +315,6 @@ var chicken_creator = function (attributes) {
 	chick.y = rand(YARD_HEIGHT) || chicken.y;
 	return chick;
 };
-
-
-var make_heading = function () {
-	return rand(360);
-}
 
 
 var game_loop = function (ctx, coop) {
@@ -382,7 +383,7 @@ var setup = function () {
     var ctx = canvas.getContext("2d");
 
     //game_loop (ctx, coop);
-    test1 (ctx, coop); // single step
-    //test_loop (ctx, coop);
+    //test1 (ctx, coop); // single step
+    test_loop (ctx, coop);
 };	
 
