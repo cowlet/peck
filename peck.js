@@ -11,6 +11,7 @@ if (typeof Object.beget !== 'function') {
      };
 }
 
+// *** Yard ***
 // The yard is the object that holds all the chickens, grain, etc and can draw the screen
 var yard = {
 	width: 500,
@@ -34,6 +35,51 @@ var yard = {
 	
 	add_grain: function (g) {
 		this.grains.push (g);
+		
+		// Provoke the chickens
+		for (var i = 0; i < this.chickens.length; i += 1)
+		{
+			// chickens are 20 pix tall, so chase to y-20
+			this.chickens[i].chasing = { "x": g.x, "y": g.y-this.chickens[i].height };
+		}
+	},
+	
+	approx_equals: function (a, b) {
+		if ( Math.abs(a-b) < 5)
+			return true;
+		return false;
+	},
+	
+	check_for_grain_collision: function () {
+		for (var i = 0; i < this.chickens.length; i += 1)
+		{
+			for (var j = 0; j < this.grains.length; j += 1)
+			{
+				// height of a walking chicken is 20 pix
+				if (this.approx_equals (this.chickens[i].x, this.grains[j].x) &&
+				    this.approx_equals (this.chickens[i].y+this.chickens[i].height, this.grains[j].y))
+				{
+					// chicken eats grain
+					console.log ("(" + this.chickens[i].x + "," + this.chickens[i].y+20 +
+					               ") approx equals (" + this.grains[j].x + "," +
+					               this.grains[j].y + ")");
+					// remove grain
+					this.grains.splice(j, 1);
+					
+					// update chicken to new behaviour
+					this.chickens[i].chasing = false;
+					this.chickens[i].behaviour.move = "peck";
+					
+					this.draw();
+				}
+				else
+				{
+					console.log ("(" + this.chickens[i].x + "," + this.chickens[i].y+20 +
+					               ") doesn't approx equal (" + this.grains[j].x + "," +
+					               this.grains[j].y + ")");
+				}
+			}			
+		}
 	},
 	
 	draw: function () {
@@ -54,10 +100,12 @@ var yard = {
 		{
 			this.grains[i].draw (this.ctx);
 		}
+		
+		this.check_for_grain_collision();
 	}
 }
 
-
+// *** Grain ***
 // Grain is a placable and eatable object, dropped in a user-generated grain drop
 var grain = {
 	x: 0,
@@ -160,9 +208,11 @@ var make_heading = function () {
 var chicken = {
 	x: 0,
 	y: 0,
+	height: 20,
 	heading: 270,
 	name: "Chicken E. Bok",
 	frame: 0,
+	chasing: false,
 	
 	direction: function () {
 		return (this.heading < 180 ? "east" : "west");
@@ -170,6 +220,24 @@ var chicken = {
 	
 	rad_heading: function () {
 		return this.heading * Math.PI / 180;
+	},
+	
+	update_chase_heading: function () {
+		// at x,y going to chasing.x,chasing.y
+		var h = rand(90);
+		
+		// generate a new heading into the quadrant of the chase
+		if (this.chasing)
+		{
+			if (this.chasing.x > this.x && this.chasing.y < this.y)
+				this.heading = h;
+			else if (this.chasing.x > this.x && this.chasing.y > this.y)
+				this.heading = 90+h;
+			else if (this.chasing.x < this.x && this.chasing.y > this.y)
+				this.heading = 180+h;
+			else
+				this.heading = 270+h;
+		}
 	},
 	
 	draw_facing: function (ctx) {
@@ -373,15 +441,27 @@ var chicken = {
 	},
 	
 	update: function () {
-		console.log("heading for " + this.name + " was " + this.heading);
-		if (!rand(5)) // 1 in 5 times, change direction
-			this.heading = make_heading();
-		console.log("heading for " + this.name + " is now " + this.heading);
+		if (this.chasing)
+		{
+			// head to the chased position
+            this.update_chase_heading();
+			
+			this.behaviour.move = "walk";
+			this.frame ? this.frame = 0 : this.frame = 1;
+			this.update_position();
+		}
+		else // normal behaviour
+		{
+			console.log("heading for " + this.name + " was " + this.heading);
+			if (!rand(5)) // 1 in 5 times, change direction
+				this.heading = make_heading();
+			console.log("heading for " + this.name + " is now " + this.heading);
 		
-		this.behaviour.next_move ();
-		this.frame ? this.frame = 0 : this.frame = 1;
-		if (this.behaviour.move === "walk")
-		    this.update_position();
+			this.behaviour.next_move ();
+			this.frame ? this.frame = 0 : this.frame = 1;
+			if (this.behaviour.move === "walk")
+			    this.update_position();
+		}
 	}
 	
 };
@@ -500,7 +580,8 @@ var test2 = function (ctx, coop) {
 var coop = [chicken_creator( { name: "Henrietta", heading: make_heading() } ),
             chicken_creator( { name: "Henelope", heading: make_heading() } ),
             chicken_creator( { name: "Henderson", heading: make_heading() } ),
-            chicken_creator( { name: "Hentick", heading: make_heading() } ) ];
+            chicken_creator( { name: "Hencules", heading: make_heading() } ),
+            chicken_creator( { name: "Hendrick", heading: make_heading() } ) ];
 
 var test_coop = [chicken_creator( { name: "Henrietta", heading: make_heading() } )];
 
