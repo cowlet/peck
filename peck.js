@@ -73,16 +73,21 @@ var markov_chain = {
 var chicken = {
 	x: 0,
 	y: 0,
-	direction: "west",
+	heading: 270,
+	//direction: "west",
 	name: "Chicken E. Bok",
 	frame: 0,
+	
+	direction: function () {
+		return (this.heading < 180 ? "east" : "west");
+	},
 	
 	draw_facing: function (ctx) {
 		var bodyX = this.x;
 		var bodyY = this.y;
 		// multiplier is pos or neg depending on direction of facing
 		// affects x offsets only
-		var m = (this.direction === "west" ? 1 : -1);
+		var m = (this.direction() === "west" ? 1 : -1);
 		
 		// beak
 		ctx.fillStyle = "orange";
@@ -116,12 +121,12 @@ var chicken = {
 	    ctx.font = "9px sans-serif";
 	    ctx.textBaseline = "top";
 
-	    var xpos = (this.direction === "west" ? this.x-24 : this.x+6);
+	    var xpos = (this.direction() === "west" ? this.x-24 : this.x+6);
 	    ctx.fillText("bok!", xpos, this.y);
 	},
 	
 	draw_pecking: function (ctx) {
-		var m = (this.direction === "west" ? 1 : -1);
+		var m = (this.direction() === "west" ? 1 : -1);
 		var bodyX = this.x - (12*m);
 		var bodyY = this.y+11;
 		
@@ -153,7 +158,7 @@ var chicken = {
 	draw_walking: function (ctx) {
 		var bodyX = this.x;
 		var bodyY = this.y;
-		var m = (this.direction === "west" ? 1 : -1);
+		var m = (this.direction() === "west" ? 1 : -1);
 		
 		// beak
 		ctx.fillStyle = "orange";
@@ -187,7 +192,7 @@ var chicken = {
 		
 	
 	draw_scratching: function (ctx, frame) {
-		var m = (this.direction === "west" ? 1 : -1);
+		var m = (this.direction() === "west" ? 1 : -1);
 		var bodyX = this.x - (8*m);
 		var bodyY = this.y+8;
 		
@@ -233,7 +238,7 @@ var chicken = {
 	
 	update_position: function () {
 	    // update x coordinate
-	    this.x += (this.direction === "west" ? -10 : 10);
+	    this.x += (this.direction() === "west" ? -10 : 10);
 	},
 	
 	
@@ -274,8 +279,10 @@ var chicken = {
 	},
 	
 	update: function () {
-		if (rand(10))
-			this.direction = this.direction === "west" ? "east" : "west";
+		console.log("heading for " + this.name + " was " + this.heading);
+		if (!rand(5)) // 1 in 5 times, change direction
+			this.heading += (this.direction() === "west" ? -180 : 180);
+		console.log("heading for " + this.name + " is now " + this.heading);
 		
 		this.behaviour.next_move ();
 		this.frame ? this.frame = 0 : this.frame = 1;
@@ -287,7 +294,7 @@ var chicken = {
 
 var chicken_creator = function (attributes) {
 	var chick = Object.beget(chicken);
-	chick.direction = attributes.direction || chicken.direction;
+	chick.heading = attributes.heading || chicken.heading;
 	chick.behaviour = Object.beget(markov_chain);
 	chick.name = attributes.name || chicken.name;
 	chick.x = rand(YARD_WIDTH) || chicken.x;
@@ -296,11 +303,10 @@ var chicken_creator = function (attributes) {
 };
 
 
-var make_direction = function () {
-	return (rand(1) ? "west" : "east");
+var make_heading = function () {
+	return (rand(1) ? 270 : 90);
 }
 
-var count = 0;
 
 var game_loop = function (ctx, coop) {
 			
@@ -313,20 +319,32 @@ var game_loop = function (ctx, coop) {
 		coop[i].update();
 	}
 	
-	count += 1;
-	//if (count < 3)
-	    var t = setTimeout(game_loop, 1000, ctx, coop);
+	var t = setTimeout(game_loop, 1000, ctx, coop);
 };
 
 var test_loop = function (ctx, coop) {
+				
+	ctx.fillStyle = "rgb(249,238,137)";
+    ctx.fillRect(0, 0, YARD_WIDTH, YARD_HEIGHT);
+    
+	coop[0].draw (ctx);
+	coop[0].update();
+	
+	var t = setTimeout(test_loop, 1000, ctx, coop);
+	
+};
+
+var test1 = function (ctx, coop) {
+	
+	// standing, peck, bok, walk, scratch
 			
 	ctx.fillStyle = "rgb(249,238,137)";
     ctx.fillRect(0, 0, YARD_WIDTH, YARD_HEIGHT);
     
 	coop[0].x = 300;
 	coop[0].y = 150;
-	coop[0].direction = "east";
-	coop[0].behaviour.move = "scratch";
+	coop[0].heading = 90;
+	coop[0].behaviour.move = "standing";
 	coop[0].draw(ctx);
 	var t = setTimeout(test2, 1000, ctx, coop);
 	
@@ -338,23 +356,25 @@ var test2 = function (ctx, coop) {
     
 	coop[0].x = 300;
 	coop[0].y = 150;
-	coop[0].direction = "east";
-	coop[0].behaviour.move = "scratch";
+	coop[0].heading = 90;
+	coop[0].behaviour.move = "standing";
 	coop[0].frame = 1;
 	coop[0].draw(ctx);
 };
 
 
+
 var setup = function () {
-	var coop = [chicken_creator( { name: "Henrietta", direction: make_direction() } ),
-	            chicken_creator( { name: "Henelope", direction: make_direction() } ),
-	            chicken_creator( { name: "Henderson", direction: make_direction() } ),
-	            chicken_creator( { name: "Hentick", direction: make_direction() } ) ];
+	var coop = [chicken_creator( { name: "Henrietta", heading: make_heading() } ),
+	            chicken_creator( { name: "Henelope", heading: make_heading() } ),
+	            chicken_creator( { name: "Henderson", heading: make_heading() } ),
+	            chicken_creator( { name: "Hentick", heading: make_heading() } ) ];
 
 	var canvas = document.getElementById("canvas");
     var ctx = canvas.getContext("2d");
 
-    game_loop (ctx, coop);
-    //test_loop (ctx, coop);
+    //game_loop (ctx, coop);
+    //test1 (ctx, coop); // single step
+    test_loop (ctx, coop);
 };	
 
