@@ -317,6 +317,52 @@ var chicken_creator = function (attributes) {
 };
 
 
+// User interaction
+var getCursorPosition = function (e) {
+    var x, y;
+
+    if (e.pageX || e.pageY)
+    {
+        x = e.pageX;
+        y = e.pageY;
+    }
+    else
+    {
+        x = e.clientX + document.body.scrollLeft +
+        document.documentElement.scrollLeft;
+        y = e.clientY + document.body.scrollTop +
+        document.documentElement.scrollTop;
+    }
+
+    canvas = document.getElementById('canvas');
+    x -= canvas.offsetLeft;
+    y -= canvas.offsetTop;
+    //x -= xOrigin;
+    //y -= yOrigin;
+
+    if (x < 0 || y < 0 || x > YARD_WIDTH || y > YARD_HEIGHT)
+    {
+        console.log("Out of bounds (" + x + "," + y + ")");
+        return undefined;
+    }
+
+    return { "x": x, "y": y };
+}
+
+var peckOnClick = function (e) {
+    var position = getCursorPosition(e);
+
+    if (position === undefined) {
+        return;
+    }
+
+    console.log ("Dropping grain at (" + position.x + "," + position.y + ")");
+    //dropGrain();
+}
+
+
+
+// game_loop prints and updates the full coop
 var game_loop = function (ctx, coop) {
 			
 	ctx.fillStyle = "rgb(249,238,137)";
@@ -331,6 +377,7 @@ var game_loop = function (ctx, coop) {
 	var t = setTimeout(game_loop, 1000, ctx, coop);
 };
 
+// test_loop loops indefinitely with only one chicken
 var test_loop = function (ctx, coop) {
 				
 	ctx.fillStyle = "rgb(249,238,137)";
@@ -343,6 +390,7 @@ var test_loop = function (ctx, coop) {
 	
 };
 
+// test1 and test2 are for stepping through two frames of a single chicken
 var test1 = function (ctx, coop) {
 	
 	// standing, peck, bok, walk, scratch
@@ -381,6 +429,8 @@ var setup = function () {
 
 	var canvas = document.getElementById("canvas");
     var ctx = canvas.getContext("2d");
+
+    canvas.addEventListener("click", peckOnClick, false);
 
     //game_loop (ctx, coop);
     //test1 (ctx, coop); // single step
