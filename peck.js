@@ -44,8 +44,8 @@ var yard = {
 		}
 	},
 	
-	approx_equals: function (a, b) {
-		if ( Math.abs(a-b) < 5)
+	approx_equals: function (a, b, diff) {
+		if (Math.abs(a-b) < diff)
 			return true;
 		return false;
 	},
@@ -56,8 +56,8 @@ var yard = {
 			for (var j = 0; j < this.grains.length; j += 1)
 			{
 				// height of a walking chicken is 20 pix
-				if (this.approx_equals (this.chickens[i].x, this.grains[j].x) &&
-				    this.approx_equals (this.chickens[i].y+this.chickens[i].height, this.grains[j].y))
+				if (this.approx_equals (this.chickens[i].x, this.grains[j].x, 5) &&
+				    this.approx_equals (this.chickens[i].y+this.chickens[i].height, this.grains[j].y, 5))
 				{
 					// chicken eats grain
 					console.log ("(" + this.chickens[i].x + "," + this.chickens[i].y+20 +
@@ -71,15 +71,62 @@ var yard = {
 					this.chickens[i].behaviour.move = "peck";
 					
 					this.draw();
+					
+					// chickens can only peck one grain at a time, so continue the outer loop
+					break;
 				}
-				else
+				/*else
 				{
 					console.log ("(" + this.chickens[i].x + "," + this.chickens[i].y+20 +
 					               ") doesn't approx equal (" + this.grains[j].x + "," +
 					               this.grains[j].y + ")");
-				}
+				}*/
 			}			
 		}
+	},
+	
+	can_chickens_see_grains: function () {
+		var i, j;
+		
+		// if there are no grains, stop all chases
+		if (this.grains.length === 0)
+		{
+			for (i = 0; i < this.chickens.length; i += 1)
+			{
+				this.chickens[i].chasing = false;
+			}
+		}
+		
+		// loop through chickens. if they can see a grain, chase
+		for (i = 0; i < this.chickens.length; i += 1)
+		{
+			for (j = 0; j < this.grains.length; j += 1)
+			{
+				// is the chicken facing it? it must be within 25 pix
+				if (this.chickens[i].direction() === "west" && (this.grains[j].x < this.chickens[i].x) ||
+				    this.chickens[i].direction() === "east" && (this.grains[j].x > this.chickens[i].x))
+				{
+					if (this.approx_equals (this.chickens[i].x, this.grains[j].x, 25) &&
+					    this.approx_equals (this.chickens[i].y+this.chickens[i].height, this.grains[j].y, 25))
+					{
+						this.chickens[i].chasing = { "x": this.grains[j].x,
+						                             "y": this.grains[j].y-this.chickens[i].height };
+						console.log (this.chickens[i].name + " can see grain");
+					}
+				}
+				else // if not facing it, it has to be very close
+				{
+					if (this.approx_equals (this.chickens[i].x, this.grains[j].x, 5) &&
+					    this.approx_equals (this.chickens[i].y+this.chickens[i].height, this.grains[j].y, 5))
+					{
+						this.chickens[i].chasing = { "x": this.grains[j].x,
+						                             "y": this.grains[j].y-this.chickens[i].height };
+						console.log (this.chickens[i].name + " is near grain");
+					}
+				}
+			}
+		}
+				
 	},
 	
 	draw: function () {
@@ -100,8 +147,6 @@ var yard = {
 		{
 			this.grains[i].draw (this.ctx);
 		}
-		
-		this.check_for_grain_collision();
 	}
 }
 
@@ -532,6 +577,8 @@ var game_loop = function (ctx) {
 	}
 	
 	yard.draw();
+	yard.check_for_grain_collision();
+	yard.can_chickens_see_grains();
 	
 	var t = setTimeout(game_loop, 1000, ctx, coop);
 };
@@ -542,6 +589,8 @@ var test_loop = function (ctx) {
 	test_coop[0].update();
 	
 	yard.draw();
+	yard.check_for_grain_collision();
+	yard.can_chickens_see_grains();
 	
 	var t = setTimeout(test_loop, 1000, ctx, coop);
 	
@@ -597,18 +646,18 @@ var setup = function () {
 
     canvas.addEventListener("click", peckOnClick, false);
 
-	//for (i = 0; i < coop.length; i += 1)
-	//{
-	//	yard.add_chicken(coop[i]);
-	//}
-	
-	for (i = 0; i < test_coop.length; i += 1)
+	for (i = 0; i < coop.length; i += 1)
 	{
-		yard.add_chicken(test_coop[i]);
+		yard.add_chicken(coop[i]);
 	}
+	game_loop (ctx, coop);
+	
+	//for (i = 0; i < test_coop.length; i += 1)
+	//{
+	//	yard.add_chicken(test_coop[i]);
+	//}
+	//test_loop (ctx, coop);
 
-    //game_loop (ctx, coop);
     //test1 (ctx, coop); // single step
-    test_loop (ctx, coop);
 };	
 
