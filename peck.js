@@ -37,11 +37,7 @@ var yard = {
 		this.grains.push (g);
 		
 		// Provoke the chickens
-		for (var i = 0; i < this.chickens.length; i += 1)
-		{
-			// chickens are 20 pix tall, so chase to y-20
-			this.chickens[i].chasing = { "x": g.x, "y": g.y-this.chickens[i].height };
-		}
+		this.chickens.forEach ( function (c) { c.chasing = { "x": g.x, "y": g.y-c.height }; });
 	},
 	
 	approx_equals: function (a, b, diff) {
@@ -51,38 +47,38 @@ var yard = {
 	},
 	
 	check_for_grain_collision: function () {
-		for (var i = 0; i < this.chickens.length; i += 1)
-		{
-			for (var j = 0; j < this.grains.length; j += 1)
-			{
-				// height of a walking chicken is 20 pix
-				if (this.approx_equals (this.chickens[i].x, this.grains[j].x, 5) &&
-				    this.approx_equals (this.chickens[i].y+this.chickens[i].height, this.grains[j].y, 5))
+
+		var eaten_grains = [];
+		var available_chickens = this.chickens.slice(0); // copy all chickens
+		var that = this;
+		
+		// match up each grain to one or zero chickens from the pool of non-eating chickens
+		this.grains.forEach (function (g) {
+			var eating_chickens = available_chickens.filter (function (c) {
+				if (that.approx_equals (c.x, g.x, 5) &&
+				    that.approx_equals (c.y+c.height, g.y, 5))
 				{
-					// chicken eats grain
-					console.log ("(" + this.chickens[i].x + "," + this.chickens[i].y+20 +
-					               ") approx equals (" + this.grains[j].x + "," +
-					               this.grains[j].y + ")");
-					// remove grain
-					this.grains.splice(j, 1);
-					
-					// update chicken to new behaviour
-					this.chickens[i].chasing = false;
-					this.chickens[i].behaviour.move = "peck";
-					
-					this.draw();
-					
-					// chickens can only peck one grain at a time, so continue the outer loop
-					break;
+					return true;
 				}
-				/*else
-				{
-					console.log ("(" + this.chickens[i].x + "," + this.chickens[i].y+20 +
-					               ") doesn't approx equal (" + this.grains[j].x + "," +
-					               this.grains[j].y + ")");
-				}*/
-			}			
-		}
+				return false;
+			});
+			
+			// if one matches, just take the first one
+			if (eating_chickens[0])
+			{
+				// eat
+				eating_chickens[0].chasing = false;
+				eating_chickens[0].behaviour.move = "peck";
+				// delete chicken from available
+				available_chickens.splice (available_chickens.indexOf(eating_chickens[0]), 1);
+				// shcedule grain for removal
+				eaten_grains.push (g);
+			}
+		});
+		
+		eaten_grains.forEach (function (g) { that.grains.splice (that.grains.indexOf (g), 1); });
+					
+		this.draw();
 	},
 	
 	can_chickens_see_grains: function () {
@@ -91,13 +87,11 @@ var yard = {
 		// if there are no grains, stop all chases
 		if (this.grains.length === 0)
 		{
-			for (i = 0; i < this.chickens.length; i += 1)
-			{
-				this.chickens[i].chasing = false;
-			}
+			this.chickens.forEach (function (c) { c.chasing = false; });
 		}
 		
 		// loop through chickens. if they can see a grain, chase
+	
 		for (i = 0; i < this.chickens.length; i += 1)
 		{
 			for (j = 0; j < this.grains.length; j += 1)
@@ -611,6 +605,11 @@ var test1 = function (ctx, coop) {
 	coop[0].draw(ctx);
 	var t = setTimeout(test2, 1000, ctx, coop);
 	
+	//var a1 = [1, 2, 3];
+	//var a2 = a1.map ( function (x) { return x+2; } )
+	//console.log ("Turned [" + a1[0] + "," + a1[1] + "," + a1[2] + "] into [" +
+	//                          a2[0] + "," + a2[1] + "," + a2[2] + "]");
+	//a1.each (function (x) { console.log ("Value " + x); });
 };
 
 var test2 = function (ctx, coop) {
@@ -627,9 +626,9 @@ var test2 = function (ctx, coop) {
 };
 
 var coop = [chicken_creator( { name: "Henrietta", heading: make_heading() } ),
-            chicken_creator( { name: "Henelope", heading: make_heading() } ),
-            chicken_creator( { name: "Henderson", heading: make_heading() } ),
-            chicken_creator( { name: "Hencules", heading: make_heading() } ),
+            //chicken_creator( { name: "Henelope", heading: make_heading() } ),
+            //chicken_creator( { name: "Henderson", heading: make_heading() } ),
+            //chicken_creator( { name: "Hencules", heading: make_heading() } ),
             chicken_creator( { name: "Hendrick", heading: make_heading() } ) ];
 
 var test_coop = [chicken_creator( { name: "Henrietta", heading: make_heading() } )];
@@ -646,10 +645,8 @@ var setup = function () {
 
     canvas.addEventListener("click", peckOnClick, false);
 
-	for (i = 0; i < coop.length; i += 1)
-	{
-		yard.add_chicken(coop[i]);
-	}
+	coop.forEach (function (c) { yard.add_chicken(c); });
+
 	game_loop (ctx, coop);
 	
 	//for (i = 0; i < test_coop.length; i += 1)
