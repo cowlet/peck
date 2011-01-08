@@ -1,7 +1,7 @@
 
 var rand = function (max) {
     return Math.floor(Math.random() * (max + 1));
-}
+};
 
 if (typeof Object.beget !== 'function') {
      Object.beget = function (o) {
@@ -9,7 +9,13 @@ if (typeof Object.beget !== 'function') {
          F.prototype = o;
          return new F();
      };
-}
+};
+
+var approx_equals = function (a, b, diff) {
+	if (Math.abs(a-b) < diff)
+		return true;
+	return false;
+};
 
 // *** Yard ***
 // The yard is the object that holds all the chickens, grain, etc and can draw the screen
@@ -40,12 +46,6 @@ var yard = {
 		this.chickens.forEach ( function (c) { c.chasing = { "x": g.x, "y": g.y-c.height }; });
 	},
 	
-	approx_equals: function (a, b, diff) {
-		if (Math.abs(a-b) < diff)
-			return true;
-		return false;
-	},
-	
 	check_for_grain_collision: function () {
 
 		var eaten_grains = [];
@@ -55,8 +55,8 @@ var yard = {
 		// match up each grain to one or zero chickens from the pool of non-eating chickens
 		this.grains.forEach (function (g) {
 			var eating_chickens = available_chickens.filter (function (c) {
-				if (that.approx_equals (c.x, g.x, 5) &&
-				    that.approx_equals (c.y+c.height, g.y, 5))
+				if (approx_equals (c.x, g.x, 5) &&
+				    approx_equals (c.y+c.height, g.y, 5))
 				{
 					return true;
 				}
@@ -90,36 +90,16 @@ var yard = {
 			this.chickens.forEach (function (c) { c.chasing = false; });
 		}
 		
+		var that = this;
 		// loop through chickens. if they can see a grain, chase
-	
-		for (i = 0; i < this.chickens.length; i += 1)
-		{
-			for (j = 0; j < this.grains.length; j += 1)
-			{
-				// is the chicken facing it? it must be within 25 pix
-				if (this.chickens[i].direction() === "west" && (this.grains[j].x < this.chickens[i].x) ||
-				    this.chickens[i].direction() === "east" && (this.grains[j].x > this.chickens[i].x))
+		this.chickens.forEach (function (c) {
+			that.grains.forEach (function (g) {
+				if (c.can_see (g) || c.standing_near (g))
 				{
-					if (this.approx_equals (this.chickens[i].x, this.grains[j].x, 25) &&
-					    this.approx_equals (this.chickens[i].y+this.chickens[i].height, this.grains[j].y, 25))
-					{
-						this.chickens[i].chasing = { "x": this.grains[j].x,
-						                             "y": this.grains[j].y-this.chickens[i].height };
-						console.log (this.chickens[i].name + " can see grain");
-					}
+					c.chasing = { "x": g.x, "y": g.y-c.height };
 				}
-				else // if not facing it, it has to be very close
-				{
-					if (this.approx_equals (this.chickens[i].x, this.grains[j].x, 5) &&
-					    this.approx_equals (this.chickens[i].y+this.chickens[i].height, this.grains[j].y, 5))
-					{
-						this.chickens[i].chasing = { "x": this.grains[j].x,
-						                             "y": this.grains[j].y-this.chickens[i].height };
-						console.log (this.chickens[i].name + " is near grain");
-					}
-				}
-			}
-		}
+			});
+		});
 				
 	},
 	
@@ -128,19 +108,11 @@ var yard = {
 		
 		this.ctx.fillStyle = "rgb(249,238,137)";
 	    this.ctx.fillRect(0, 0, this.width, this.height);
-		
-		for (i = 0; i < this.chickens.length; i += 1)
-		{
-			this.chickens[i].draw (this.ctx);
-		}
-		for (i = 0; i < this.objects.length; i += 1)
-		{
-			this.objects[i].draw (this.ctx);
-		}
-		for (i = 0; i < this.grains.length; i += 1)
-		{
-			this.grains[i].draw (this.ctx);
-		}
+	
+		var that = this;
+		this.chickens.forEach (function (c) { c.draw (that.ctx); });
+		this.objects.forEach (function (o) { o.draw (that.ctx); });
+		this.grains.forEach (function (g) { g.draw (that.ctx); });
 	}
 }
 
@@ -277,6 +249,30 @@ var chicken = {
 			else
 				this.heading = 270+h;
 		}
+	},
+	
+	can_see: function (grain) {
+		if (this.direction() === "west" && (grain.x < this.x) ||
+		    this.direction() === "east" && (grain.x > this.x))
+		{
+			if (approx_equals (this.x, grain.x, 25) &&
+			    approx_equals (this.y+this.height, grain.y, 25))
+			{
+				console.log (this.name + " can see grain");
+				return true;
+			}
+		}
+		return false;
+	},
+	
+	standing_near: function (grain) {
+		if (approx_equals (this.x, grain.x, 5) &&
+		    approx_equals (this.y+this.height, grain.y, 5))
+		{
+			console.log (this.name + " is near grain");
+			return true;
+		}
+		return false;
 	},
 	
 	draw_facing: function (ctx) {
