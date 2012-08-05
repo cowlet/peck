@@ -1,3 +1,5 @@
+var canvas;
+var ctx;
 
 var rand = function (max) {
     return Math.floor(Math.random() * (max + 1));
@@ -518,12 +520,7 @@ var chicken = {
 	draw: function (ctx) {
 		//console.log ("Drawing move " + this.behaviour.move);
 		
-		this.select_frame(ctx, this.behaviour.move, this.frame);		
-		
-		ctx.fillStyle = "black";
-	    ctx.font = "9px sans-serif";
-	    ctx.textBaseline = "top";
-	    ctx.fillText(this.name, this.x, this.y+22);
+		this.select_frame(ctx, this.behaviour.move, this.frame);
 	},
 	
 	update: function () {
@@ -532,7 +529,7 @@ var chicken = {
 		
 		if (this.time_to_update <= 0)
 		{
-			console.log("Updating " + this.name);
+			//console.log("Updating " + this.name);
 			if (this.chasing)
 			{
 				// head to the chased position
@@ -544,10 +541,10 @@ var chicken = {
 			}
 			else // normal behaviour
 			{
-				console.log("heading for " + this.name + " was " + this.heading);
+				//console.log("heading for " + this.name + " was " + this.heading);
 				if (!rand(5)) // 1 in 5 times, change direction
 					this.heading = make_heading();
-				console.log("heading for " + this.name + " is now " + this.heading);
+				//console.log("heading for " + this.name + " is now " + this.heading);
 		
 				this.behaviour.next_move ();
 				this.frame ? this.frame = 0 : this.frame = 1;
@@ -614,6 +611,27 @@ var peckOnClick = function (e) {
 
     console.log ("Dropping grain at (" + position.x + "," + position.y + ")");
     dropGrain(position);
+}
+
+var mouseOnChicken = function (e) {
+	var position = getCursorPosition (e);
+	
+	if (position === undefined) {
+		return;
+	}
+	
+	coop.forEach (function (c) { 
+		if (approx_equals (c.x, position.x, 25) &&
+		    approx_equals (c.y+c.height, position.y, 25))
+		{
+			// draw name
+			ctx.fillStyle = "black";
+			ctx.font = "9px sans-serif";
+			ctx.textBaseline = "top";
+			ctx.fillText(c.name, c.x, c.y+22);
+			return;
+		}
+	});
 }
 
 
@@ -686,13 +704,14 @@ var test_coop = [chicken_creator( { name: "Henrietta", heading: make_heading() }
 
 var setup = function () {
 
-	var canvas = document.getElementById("canvas");
-    var ctx = canvas.getContext("2d");
+	canvas = document.getElementById("canvas");
+    ctx = canvas.getContext("2d");
 
 	yard.set_ctx (ctx);
 	yard.set_infobar ();
 
     canvas.addEventListener("click", peckOnClick, false);
+	canvas.addEventListener("mousemove", mouseOnChicken, false);
 
 	coop.forEach (function (c) { yard.add_chicken(c); });
 	game_loop (ctx, coop);
