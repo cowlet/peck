@@ -222,6 +222,7 @@ var chicken = {
 	name: "Chicken E. Bok",
 	frame: 0,
 	chasing: false,
+	time_to_update: 0,
 	
 	direction: function () {
 		return (this.heading < 180 ? "east" : "west");
@@ -438,7 +439,7 @@ var chicken = {
 	
 	
 	select_frame: function (ctx, move, frame) {
-		console.log ("Selecting frame for " + move + ", " +frame);
+		//console.log ("Selecting frame for " + move + ", " +frame);
 		if (frame === 0)
 		{
 			if (move === "standing")
@@ -474,26 +475,36 @@ var chicken = {
 	},
 	
 	update: function () {
-		if (this.chasing)
-		{
-			// head to the chased position
-            this.update_chase_heading();
-			
-			this.behaviour.move = "walk";
-			this.frame ? this.frame = 0 : this.frame = 1;
-			this.update_position();
-		}
-		else // normal behaviour
-		{
-			console.log("heading for " + this.name + " was " + this.heading);
-			if (!rand(5)) // 1 in 5 times, change direction
-				this.heading = make_heading();
-			console.log("heading for " + this.name + " is now " + this.heading);
+		// decrement hysteresis counter before deciding to update
+		this.time_to_update -= 1;
 		
-			this.behaviour.next_move ();
-			this.frame ? this.frame = 0 : this.frame = 1;
-			if (this.behaviour.move === "walk")
-			    this.update_position();
+		if (this.time_to_update <= 0)
+		{
+			console.log("Updating " + this.name);
+			if (this.chasing)
+			{
+				// head to the chased position
+	            this.update_chase_heading();
+			
+				this.behaviour.move = "walk";
+				this.frame ? this.frame = 0 : this.frame = 1;
+				this.update_position();
+			}
+			else // normal behaviour
+			{
+				console.log("heading for " + this.name + " was " + this.heading);
+				if (!rand(5)) // 1 in 5 times, change direction
+					this.heading = make_heading();
+				console.log("heading for " + this.name + " is now " + this.heading);
+		
+				this.behaviour.next_move ();
+				this.frame ? this.frame = 0 : this.frame = 1;
+				if (this.behaviour.move === "walk")
+				    this.update_position();
+			}
+			
+			// reset update counter
+			this.time_to_update = 50 + rand(50);
 		}
 	}
 	
@@ -565,7 +576,7 @@ var game_loop = function (ctx) {
 	yard.can_chickens_see_grains();
 	yard.draw();
 	
-	var t = setTimeout(game_loop, 1000, ctx, coop);
+	var t = setTimeout(game_loop, 10, ctx, coop);
 };
 
 // test_loop loops indefinitely with only one chicken
@@ -577,7 +588,7 @@ var test_loop = function (ctx) {
 	yard.can_chickens_see_grains();
 	yard.draw();
 	
-	var t = setTimeout(test_loop, 1000, ctx, coop);
+	var t = setTimeout(test_loop, 10, ctx, coop);
 	
 };
 
