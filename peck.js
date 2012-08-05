@@ -26,6 +26,16 @@ var yard = {
 	chickens: [],
 	objects: [],
 	grains: [],
+	infobar: undefined,
+	
+	set_infobar: function () {
+		this.infobar = Object.beget (infobar);
+		
+		this.infobar.x = 0;
+		this.infobar.y = 300;
+		this.infobar.width = 500;
+		this.infobar.height = 100;
+	},
 	
 	set_ctx: function (ctx) {
 		this.ctx = ctx;
@@ -111,6 +121,48 @@ var yard = {
 		this.chickens.forEach (function (c) { c.draw (that.ctx); });
 		this.objects.forEach (function (o) { o.draw (that.ctx); });
 		this.grains.forEach (function (g) { g.draw (that.ctx); });
+		
+		this.infobar.draw (this.ctx, this.chickens);
+	}
+}
+
+// *** Infobar ***
+// The infobar prints all the chicken info
+var infobar = {
+	x: 0,
+	y: 0,
+	width: 500,
+	height: 100,
+	line_height: 15,
+	y_indent: 20,
+	
+	x_column_1: 15,
+	x_column_2: 100,
+	x_column_3: 200,
+	
+	draw: function (ctx, chickens) {
+		ctx.fillStyle = "rgb(0,0,0)";
+	    ctx.fillRect(this.x, this.y, this.width, this.height);
+		ctx.fillStyle = "rgb(255,255,255)";
+	    ctx.fillRect(this.x+2, this.y+2, this.width-4, this.height-4);
+		
+		ctx.fillStyle = "black";
+		ctx.font = "bold 9px sans-serif";
+	    ctx.textBaseline = "top";
+		ctx.fillText("Name", this.x+this.x_column_1, this.y+5)
+		ctx.fillText("Action", this.x+this.x_column_2, this.y+5)
+		ctx.fillText("Status", this.x+this.x_column_3, this.y+5)
+
+		var that = this;
+	    ctx.font = "9px sans-serif";
+		chickens.forEach (function (c, i) {
+			ctx.fillText(c.name,
+				         (that.x+that.x_column_1),
+				         (that.y+that.y_indent + i*that.line_height));
+			ctx.fillText(c.behaviour.move,
+				         (that.x+that.x_column_2),
+				         (that.y+that.y_indent + i*that.line_height));
+		});
 	}
 }
 
@@ -637,7 +689,8 @@ var setup = function () {
 	var canvas = document.getElementById("canvas");
     var ctx = canvas.getContext("2d");
 
-	yard.set_ctx(ctx);
+	yard.set_ctx (ctx);
+	yard.set_infobar ();
 
     canvas.addEventListener("click", peckOnClick, false);
 
