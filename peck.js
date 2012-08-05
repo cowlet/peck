@@ -1,6 +1,3 @@
-var canvas;
-var ctx;
-
 var rand = function (max) {
     return Math.floor(Math.random() * (max + 1));
 };
@@ -25,6 +22,7 @@ var yard = {
 	width: 500,
 	height: 300,
 	ctx: undefined,
+	mouse_state: undefined,
 	chickens: [],
 	objects: [],
 	grains: [],
@@ -41,6 +39,10 @@ var yard = {
 	
 	set_ctx: function (ctx) {
 		this.ctx = ctx;
+	},
+	
+	set_mouse: function (ms) {
+		this.mouse_state = ms;
 	},
 	
 	add_chicken: function (c) {
@@ -113,6 +115,29 @@ var yard = {
 				
 	},
 	
+	check_for_mouse_on_chickens: function () {
+		if (this.mouse_state === undefined)
+		{
+			console.log("Mouse undefined");
+			return;
+		}
+
+		var that = this;
+		console.log(this.mouse_state);
+		console.log(this.chickens[0]);
+		this.chickens.forEach (function (c) { 
+			if (approx_equals (c.x, that.mouse_state.x, 25) &&
+			    approx_equals (c.y+c.height, that.mouse_state.y, 25))
+			{
+				// draw name
+				that.ctx.fillStyle = "black";
+				that.ctx.font = "9px sans-serif";
+				that.ctx.textBaseline = "top";
+				that.ctx.fillText(c.name, c.x, c.y+22);
+			}
+		});		
+	},
+	
 	draw: function () {
 		var i;
 		
@@ -125,6 +150,8 @@ var yard = {
 		this.grains.forEach (function (g) { g.draw (that.ctx); });
 		
 		this.infobar.draw (this.ctx, this.chickens);
+		
+		this.check_for_mouse_on_chickens ();
 	}
 }
 
@@ -600,7 +627,7 @@ var getCursorPosition = function (e) {
     }
 
     return { "x": x, "y": y };
-}
+};
 
 var peckOnClick = function (e) {
     var position = getCursorPosition(e);
@@ -611,28 +638,8 @@ var peckOnClick = function (e) {
 
     console.log ("Dropping grain at (" + position.x + "," + position.y + ")");
     dropGrain(position);
-}
+};
 
-var mouseOnChicken = function (e) {
-	var position = getCursorPosition (e);
-	
-	if (position === undefined) {
-		return;
-	}
-	
-	coop.forEach (function (c) { 
-		if (approx_equals (c.x, position.x, 25) &&
-		    approx_equals (c.y+c.height, position.y, 25))
-		{
-			// draw name
-			ctx.fillStyle = "black";
-			ctx.font = "9px sans-serif";
-			ctx.textBaseline = "top";
-			ctx.fillText(c.name, c.x, c.y+22);
-			return;
-		}
-	});
-}
 
 
 // *** Game loops ***
@@ -704,14 +711,17 @@ var test_coop = [chicken_creator( { name: "Henrietta", heading: make_heading() }
 
 var setup = function () {
 
-	canvas = document.getElementById("canvas");
-    ctx = canvas.getContext("2d");
+	var canvas = document.getElementById("canvas");
+    var ctx = canvas.getContext("2d");
 
 	yard.set_ctx (ctx);
 	yard.set_infobar ();
 
     canvas.addEventListener("click", peckOnClick, false);
-	canvas.addEventListener("mousemove", mouseOnChicken, false);
+
+	canvas.addEventListener("mousemove", function (e) {
+		yard.set_mouse(getCursorPosition(e));
+	}, false);
 
 	coop.forEach (function (c) { yard.add_chicken(c); });
 	game_loop (ctx, coop);
