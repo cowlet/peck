@@ -15,6 +15,13 @@ PECK.colourways = {
 		grain: "black",
 		text: "white"
 	},
+	between: {
+		ground: "rgb(242,159,153)",
+		body: "brown",
+		beaksnfeet: "rgb(220,120,90)",
+		grain: "brown",
+		text: "white"
+	},
 };
 
 PECK.colouring = function (area) {
@@ -183,7 +190,7 @@ PECK.infobar = {
 	x_columns: [15, 100, 200, 360],
 	
 	day: 0,
-	hour: 7,
+	hour: 6,
 	
 	increment_time: function () {
 		this.hour += 1;
@@ -195,9 +202,13 @@ PECK.infobar = {
 	},
 	
 	day_or_night: function () {
-		if (this.hour >= 8 && this.hour < 20)
+		if (this.hour > 7 && this.hour < 19)
 		{
 			return "day";
+		}
+		else if (this.hour === 7 || this.hour === 19)
+		{
+			return "between";
 		}
 		else
 		{

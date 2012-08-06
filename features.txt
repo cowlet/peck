@@ -7,8 +7,8 @@
 - Eating grain increases satiation
 - Satiation decreases over time
 
-- Have a day/night cycle
-- Change colours/drawing for day/night
++ Have a day/night cycle
++ Change colours/drawing for day/night
 
 - Can require certain amount of food over day/night
 - Can lay eggs
