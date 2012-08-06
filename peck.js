@@ -1,4 +1,6 @@
-var rand = function (max) {
+var PECK = {};
+
+PECK.rand = function (max) {
     return Math.floor(Math.random() * (max + 1));
 };
 
@@ -10,7 +12,7 @@ if (typeof Object.beget !== 'function') {
      };
 };
 
-var approx_equals = function (a, b, diff) {
+PECK.approx_equals = function (a, b, diff) {
 	if (Math.abs(a-b) < diff)
 		return true;
 	return false;
@@ -18,7 +20,8 @@ var approx_equals = function (a, b, diff) {
 
 // *** Yard ***
 // The yard is the object that holds all the chickens, grain, etc and can draw the screen
-var yard = {
+// Singleton object
+PECK.yard = {
 	width: 500,
 	height: 300,
 	ctx: undefined,
@@ -26,16 +29,6 @@ var yard = {
 	chickens: [],
 	objects: [],
 	grains: [],
-	infobar: undefined,
-	
-	set_infobar: function () {
-		this.infobar = Object.beget (infobar);
-		
-		this.infobar.x = 0;
-		this.infobar.y = this.height;
-		this.infobar.width = this.width;
-		this.infobar.height = 100;
-	},
 	
 	set_ctx: function (ctx) {
 		this.ctx = ctx;
@@ -69,8 +62,8 @@ var yard = {
 		// match up each grain to one or zero chickens from the pool of non-eating chickens
 		this.grains.forEach (function (g) {
 			var eating_chickens = available_chickens.filter (function (c) {
-				if (approx_equals (c.x, g.x, 5) &&
-				    approx_equals (c.y+c.height, g.y, 5))
+				if (PECK.approx_equals (c.x, g.x, 5) &&
+				    PECK.approx_equals (c.y+c.height, g.y, 5))
 				{
 					return true;
 				}
@@ -125,8 +118,8 @@ var yard = {
 		//console.log(this.mouse_state);
 		//console.log(this.chickens[0]);
 		this.chickens.forEach (function (c) { 
-			if (approx_equals (c.x, that.mouse_state.x, 25) &&
-			    approx_equals (c.y+c.height, that.mouse_state.y, 25))
+			if (PECK.approx_equals (c.x, that.mouse_state.x, 25) &&
+			    PECK.approx_equals (c.y+c.height, that.mouse_state.y, 25))
 			{
 				// draw name
 				that.ctx.fillStyle = "black";
@@ -148,7 +141,7 @@ var yard = {
 		this.objects.forEach (function (o) { o.draw (that.ctx); });
 		this.grains.forEach (function (g) { g.draw (that.ctx); });
 		
-		this.infobar.draw (this.ctx, this.chickens);
+		PECK.infobar.draw (this.ctx, this.chickens);
 		
 		this.check_for_mouse_on_chickens ();
 	}
@@ -156,10 +149,11 @@ var yard = {
 
 // *** Infobar ***
 // The infobar prints all the chicken info
-var infobar = {
+// Singleton object
+PECK.infobar = {
 	x: 0,
-	y: 0,
-	width: 500,
+	y: PECK.yard.height,
+	width: PECK.yard.width,
 	height: 100,
 	line_height: 15,
 	y_indent: 20,
@@ -196,7 +190,7 @@ var infobar = {
 
 // *** Grain ***
 // Grain is a placable and eatable object, dropped in a user-generated grain drop
-var grain = {
+PECK.grain = {
 	x: 0,
 	y: 0,
 	
@@ -211,14 +205,14 @@ var grain = {
 	}
 }
 
-var generate_grain = function (x, y) {
-	var g = Object.beget(grain);
-	g.x = x || grain.x;
-	g.y = y || grain.y;
+PECK.generate_grain = function (x, y) {
+	var g = Object.beget(PECK.grain);
+	g.x = x || PECK.grain.x;
+	g.y = y || PECK.grain.y;
 	return g;
 };
 
-var dropGrain = function (position) {
+PECK.dropGrain = function (position) {
 	// position has x and y, which is the centre of the 10x10 grain drop
 	var startX = position.x - 5;
 	var startY = position.y - 5;
@@ -226,16 +220,16 @@ var dropGrain = function (position) {
 	// drop 10 bits of grain
 	for (var i = 0; i < 10; i += 1)
 	{
-		yard.add_grain (generate_grain(startX+rand(10), startY+rand(10)));
+		PECK.yard.add_grain (PECK.generate_grain(startX+PECK.rand(10), startY+PECK.rand(10)));
 	}
-	yard.draw();
+	PECK.yard.draw();
 }
 
 
 // *** Chicken-related items ***
 // Chicken behaviours: markov_chain for normal activities, chase behaviour for grain
 
-var markov_chain = {
+PECK.markov_chain = {
 	moves: ["standing", "bok", "peck", "walk", "scratch"],
 	transitions: {
 		"standing": [10, 20, 10, 40, 20],
@@ -248,7 +242,7 @@ var markov_chain = {
 	
 	next_move: function () {
 		//console.log ("In next_move, current value " + this.move);
-		var p = rand(100);
+		var p = PECK.rand(100);
 		var nexts = this.transitions[this.move];
 		var i;
 		var q = 0; // q is the interim probability between 0 and p
@@ -265,12 +259,12 @@ var markov_chain = {
 };
 
 // Chicken helper functions
-var make_heading = function () {
-	return rand(360);
+PECK.make_heading = function () {
+	return PECK.rand(360);
 }
 
 // Chicken object
-var chicken = {
+PECK.chicken = {
 	x: 0,
 	y: 0,
 	height: 20,
@@ -290,7 +284,7 @@ var chicken = {
 	
 	update_chase_heading: function () {
 		// at x,y going to chasing.x,chasing.y
-		var h = rand(90);
+		var h = PECK.rand(90);
 		
 		// generate a new heading into the quadrant of the chase
 		if (this.chasing)
@@ -310,10 +304,10 @@ var chicken = {
 		if (this.direction() === "west" && (grain.x < this.x) ||
 		    this.direction() === "east" && (grain.x > this.x))
 		{
-			if (approx_equals (this.x, grain.x, 25) &&
-			    approx_equals (this.y+this.height, grain.y, 25))
+			if (PECK.approx_equals (this.x, grain.x, 25) &&
+			    PECK.approx_equals (this.y+this.height, grain.y, 25))
 			{
-				console.log (this.name + " can see grain");
+				//console.log (this.name + " can see grain");
 				return true;
 			}
 		}
@@ -321,10 +315,10 @@ var chicken = {
 	},
 	
 	standing_near: function (grain) {
-		if (approx_equals (this.x, grain.x, 5) &&
-		    approx_equals (this.y+this.height, grain.y, 5))
+		if (PECK.approx_equals (this.x, grain.x, 5) &&
+		    PECK.approx_equals (this.y+this.height, grain.y, 5))
 		{
-			console.log (this.name + " is near grain");
+			//console.log (this.name + " is near grain");
 			return true;
 		}
 		return false;
@@ -544,8 +538,8 @@ var chicken = {
 			else // normal behaviour
 			{
 				//console.log("heading for " + this.name + " was " + this.heading);
-				if (!rand(5)) // 1 in 5 times, change direction
-					this.heading = make_heading();
+				if (!PECK.rand(5)) // 1 in 5 times, change direction
+					this.heading = PECK.make_heading();
 				//console.log("heading for " + this.name + " is now " + this.heading);
 		
 				this.behaviour.next_move ();
@@ -555,25 +549,25 @@ var chicken = {
 			}
 			
 			// reset update counter
-			this.time_to_update = 50 + rand(50);
+			this.time_to_update = 50 + PECK.rand(50);
 		}
 	}
 	
 };
 
-var chicken_creator = function (attributes) {
-	var chick = Object.beget(chicken);
-	chick.heading = attributes.heading || chicken.heading;
-	chick.behaviour = Object.beget(markov_chain);
-	chick.name = attributes.name || chicken.name;
-	chick.x = rand(yard.width) || chicken.x;
-	chick.y = rand(yard.height) || chicken.y;
+PECK.chicken_creator = function (attributes) {
+	var chick = Object.beget(PECK.chicken);
+	chick.heading = attributes.heading || PECK.chicken.heading;
+	chick.behaviour = Object.beget(PECK.markov_chain);
+	chick.name = attributes.name || PECK.chicken.name;
+	chick.x = PECK.rand (PECK.yard.width) || PECK.chicken.x;
+	chick.y = PECK.rand (PECK.yard.height) || PECK.chicken.y;
 	return chick;
 };
 
 
 // User interaction
-var getCursorPosition = function (e) {
+PECK.getCursorPosition = function (e) {
     var x, y;
 
     if (e.pageX || e.pageY)
@@ -595,7 +589,7 @@ var getCursorPosition = function (e) {
     //x -= xOrigin;
     //y -= yOrigin;
 
-    if (x < 0 || y < 0 || x > yard.width || y > yard.height)
+    if (x < 0 || y < 0 || x > PECK.yard.width || y > PECK.yard.height)
     {
         //console.log("Out of bounds (" + x + "," + y + ")");
         return undefined;
@@ -604,106 +598,51 @@ var getCursorPosition = function (e) {
     return { "x": x, "y": y };
 };
 
-var peckOnClick = function (e) {
-    var position = getCursorPosition(e);
+PECK.peckOnClick = function (e) {
+    var position = PECK.getCursorPosition(e);
 
     if (position === undefined) {
         return;
     }
 
-    console.log ("Dropping grain at (" + position.x + "," + position.y + ")");
-    dropGrain(position);
+    //console.log ("Dropping grain at (" + position.x + "," + position.y + ")");
+    PECK.dropGrain(position);
 };
 
 
 
-// *** Game loops ***
+// *** Game loop ***
 
-// game_loop prints and updates the full coop
-var game_loop = function (ctx) {
-    
-	coop.forEach (function (c) { c.update (); });
+// game_loop prints and updates the full yard of chickens
+PECK.game_loop = function (ctx) {
+    	
+	PECK.yard.chickens.forEach (function (c) { c.update (); });
+	PECK.yard.check_for_grain_collision();
+	PECK.yard.can_chickens_see_grains();
+	PECK.yard.draw();
 	
-	yard.check_for_grain_collision();
-	yard.can_chickens_see_grains();
-	yard.draw();
-	
-	var t = setTimeout(game_loop, 10, ctx, coop);
+	var t = setTimeout(PECK.game_loop, 10, ctx);
 };
-
-// test_loop loops indefinitely with only one chicken
-var test_loop = function (ctx) {
-    
-	test_coop[0].update();
-	
-	yard.check_for_grain_collision();
-	yard.can_chickens_see_grains();
-	yard.draw();
-	
-	var t = setTimeout(test_loop, 10, ctx, coop);
-	
-};
-
-// test1 and test2 are for stepping through two frames of a single chicken
-var test1 = function (ctx, coop) {
-	
-	// standing, peck, bok, walk, scratch
-			
-	ctx.fillStyle = "rgb(249,238,137)";
-    ctx.fillRect(0, 0, yard.width, yard.height);
-    
-	coop[0].x = 300;
-	coop[0].y = 150;
-	coop[0].heading = 240;
-	coop[0].behaviour.move = "walk";
-	coop[0].draw(ctx);
-	var t = setTimeout(test2, 1000, ctx, coop);
-};
-
-var test2 = function (ctx, coop) {
-	ctx.fillStyle = "rgb(249,238,137)";
-    ctx.fillRect(0, 0, yard.width, yard.height);
-    
-	coop[0].x = 300;
-	coop[0].y = 150;
-	coop[0].heading = 240;
-	coop[0].behaviour.move = "walk";
-	coop[0].update_position();
-	coop[0].frame = 1;
-	coop[0].draw(ctx);
-};
-
-var coop = [chicken_creator( { name: "Henrietta", heading: make_heading() } ),
-            chicken_creator( { name: "Henelope", heading: make_heading() } ),
-            chicken_creator( { name: "Henderson", heading: make_heading() } ),
-            chicken_creator( { name: "Hencules", heading: make_heading() } ),
-            chicken_creator( { name: "Hendrick", heading: make_heading() } ) ];
-
-var test_coop = [chicken_creator( { name: "Henrietta", heading: make_heading() } )];
 
 
 // *** Starting point ***
 
-var setup = function () {
+PECK.setup = function () {	
 
 	var canvas = document.getElementById("canvas");
     var ctx = canvas.getContext("2d");
 
-	yard.set_ctx (ctx);
-	yard.set_infobar ();
+	PECK.yard.set_ctx (ctx);
 
-    canvas.addEventListener("click", peckOnClick, false);
-
+    canvas.addEventListener("click", PECK.peckOnClick, false);
 	canvas.addEventListener("mousemove", function (e) {
-		yard.set_mouse(getCursorPosition(e));
+		PECK.yard.set_mouse(PECK.getCursorPosition(e));
 	}, false);
-
-	coop.forEach (function (c) { yard.add_chicken(c); });
-	game_loop (ctx, coop);
 	
-	//test_coop.forEach (function (c) { yard.add_chicken(c); });
-	//test_loop (ctx, coop);
+	["Henrietta", "Henelope", "Henderson", "Hencules", "Hendrick"].forEach (function (n) {
+		PECK.yard.add_chicken (PECK.chicken_creator ({ name: n, heading: PECK.make_heading() }));
+	});
 
-    //test1 (ctx, coop); // single step
+	PECK.game_loop (ctx);
 };	
 
