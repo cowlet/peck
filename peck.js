@@ -1,5 +1,27 @@
 var PECK = {};
 
+PECK.colourways = {
+	day: {
+		ground: "rgb(249,238,137)",
+	    body: "brown",
+	    beaksnfeet: "orange",
+	    grain: "brown",
+	    text: "black"
+	},
+	night: {
+		ground: "rgb(50,50,100)",
+		body: "rgb(20,20,20)",
+		beaksnfeet: "rgb(165,150,150)",
+		grain: "black",
+		text: "white"
+	},
+};
+
+PECK.colouring = function (area) {
+	return PECK.colourways[PECK.infobar.day_or_night()][area];
+};
+
+
 PECK.rand = function (max) {
     return Math.floor(Math.random() * (max + 1));
 };
@@ -122,7 +144,7 @@ PECK.yard = {
 			    PECK.approx_equals (c.y+c.height, that.mouse_state.y, 25))
 			{
 				// draw name
-				that.ctx.fillStyle = "black";
+				that.ctx.fillStyle = PECK.colouring("text");
 				that.ctx.font = "9px sans-serif";
 				that.ctx.textBaseline = "top";
 				that.ctx.fillText(c.name, c.x, c.y+22);
@@ -133,7 +155,8 @@ PECK.yard = {
 	draw: function () {
 		var i;
 		
-		this.ctx.fillStyle = "rgb(249,238,137)";
+		//this.ctx.fillStyle = "rgb(249,238,137)";
+		this.ctx.fillStyle = PECK.colouring ("ground");
 	    this.ctx.fillRect(0, 0, this.width, this.height);
 	
 		var that = this;
@@ -156,35 +179,71 @@ PECK.infobar = {
 	width: PECK.yard.width,
 	height: 100,
 	line_height: 15,
-	y_indent: 20,
+	y_indent: 20,	
+	x_columns: [15, 100, 200, 360],
 	
-	x_column_1: 15,
-	x_column_2: 100,
-	x_column_3: 200,
+	day: 0,
+	hour: 7,
+	
+	increment_time: function () {
+		this.hour += 1;
+		if (this.hour > 23)
+		{
+			this.hour = 0;
+			this.day += 1;
+		}
+	},
+	
+	day_or_night: function () {
+		if (this.hour >= 8 && this.hour < 20)
+		{
+			return "day";
+		}
+		else
+		{
+			return "night";
+		}
+	},
+			 
 	
 	draw: function (ctx, chickens) {
-		ctx.fillStyle = "rgb(0,0,0)";
+		ctx.fillStyle = "black";
 	    ctx.fillRect(this.x, this.y, this.width, this.height);
-		ctx.fillStyle = "rgb(255,255,255)";
+		ctx.fillStyle = "white";
 	    ctx.fillRect(this.x+2, this.y+2, this.width-4, this.height-4);
 		
 		ctx.fillStyle = "black";
 		ctx.font = "bold 9px sans-serif";
 	    ctx.textBaseline = "top";
-		ctx.fillText("Name", this.x+this.x_column_1, this.y+5)
-		ctx.fillText("Action", this.x+this.x_column_2, this.y+5)
-		ctx.fillText("Status", this.x+this.x_column_3, this.y+5)
+		ctx.fillText("Name", this.x+this.x_columns[0], this.y+5)
+		ctx.fillText("Action", this.x+this.x_columns[1], this.y+5)
+		ctx.fillText("Status", this.x+this.x_columns[2], this.y+5)
 
 		var that = this;
 	    ctx.font = "9px sans-serif";
 		chickens.forEach (function (c, i) {
 			ctx.fillText(c.name,
-				         (that.x+that.x_column_1),
+				         (that.x+that.x_columns[0]),
 				         (that.y+that.y_indent + i*that.line_height));
 			ctx.fillText(c.behaviour.move,
-				         (that.x+that.x_column_2),
+				         (that.x+that.x_columns[1]),
 				         (that.y+that.y_indent + i*that.line_height));
 		});
+		
+		ctx.fillStyle = "black";
+		ctx.fillRect(this.x+this.x_columns[3]-5, this.y, 2, this.height);
+		ctx.font = "bold 9px sans-serif";
+	    ctx.textBaseline = "top";
+	    ctx.fillText ("Farm", this.x+this.x_columns[3]+this.x_columns[0], this.y+5);
+		
+		ctx.font = "9px sans-serif";
+	    ctx.fillText ("Day: " + this.day,
+	                  this.x+this.x_columns[3]+this.x_columns[0],
+	                  this.y+this.y_indent);
+	    ctx.fillText ("Time: " + this.hour + ":00",
+	                  this.x+this.x_columns[3]+this.x_columns[0],
+	                  this.y+this.y_indent + this.line_height);
+	    
 	}
 }
 
@@ -195,7 +254,7 @@ PECK.grain = {
 	y: 0,
 	
 	draw: function (ctx) {
-		ctx.fillStyle = "brown"
+		ctx.fillStyle = PECK.colouring ("body");
 		ctx.beginPath();
 		ctx.moveTo(this.x, this.y);
 		ctx.lineTo(this.x+1, this.y);
@@ -332,7 +391,7 @@ PECK.chicken = {
 		var m = (this.direction() === "west" ? 1 : -1);
 		
 		// beak
-		ctx.fillStyle = "orange";
+		ctx.fillStyle = PECK.colouring("beaksnfeet");
 		ctx.beginPath();
 		ctx.moveTo(bodyX, bodyY);
 		ctx.lineTo(bodyX + (-4*m), bodyY+4);
@@ -340,7 +399,7 @@ PECK.chicken = {
 		ctx.fill();
 		
 		// body		
-		ctx.fillStyle = "brown"
+		ctx.fillStyle = PECK.colouring("body");
 		ctx.beginPath();
 		ctx.moveTo(bodyX, bodyY);
 		ctx.lineTo(bodyX, bodyY+16);
@@ -348,7 +407,7 @@ PECK.chicken = {
 		ctx.fill();
 		
 		// feet
-		ctx.fillStyle = "orange";
+		ctx.fillStyle = PECK.colouring("beaksnfeet");
 		ctx.beginPath();
 		ctx.moveTo(bodyX + (4*m), bodyY+16);
 		ctx.lineTo(bodyX + (2*m), bodyY+20);
@@ -359,7 +418,7 @@ PECK.chicken = {
 	
 	draw_bokking: function (ctx) {
 		this.draw_facing (ctx);
-		ctx.fillStyle = "black";
+		ctx.fillStyle = PECK.colouring("text");
 	    ctx.font = "9px sans-serif";
 	    ctx.textBaseline = "top";
 
@@ -373,7 +432,7 @@ PECK.chicken = {
 		var bodyY = this.y+11;
 		
 		// body
-		ctx.fillStyle = "brown"
+		ctx.fillStyle = PECK.colouring("body");
 		ctx.beginPath();
 		ctx.moveTo(bodyX, bodyY);
 		ctx.lineTo(bodyX + (12*m), bodyY+5);
@@ -381,7 +440,7 @@ PECK.chicken = {
 		ctx.fill();
 		
 		// beak
-		ctx.fillStyle = "orange";
+		ctx.fillStyle = PECK.colouring("beaksnfeet");
 		ctx.beginPath();
 		ctx.moveTo(bodyX, bodyY);
 		ctx.lineTo(bodyX + (3*m), bodyY+8);
@@ -389,7 +448,7 @@ PECK.chicken = {
 		ctx.fill();
 		
 		// feet
-		ctx.fillStyle = "orange";
+		ctx.fillStyle = PECK.colouring("beaksnfeet");
 		ctx.beginPath();
 		ctx.moveTo(bodyX + (15*m), this.y+16);
 		ctx.lineTo(bodyX + (13*m), this.y+20);
@@ -403,7 +462,7 @@ PECK.chicken = {
 		var m = (this.direction() === "west" ? 1 : -1);
 		
 		// beak
-		ctx.fillStyle = "orange";
+		ctx.fillStyle = PECK.colouring("beaksnfeet");
 		ctx.beginPath();
 		ctx.moveTo(bodyX, bodyY);
 		ctx.lineTo(bodyX + (-4*m), bodyY+4);
@@ -411,7 +470,7 @@ PECK.chicken = {
 		ctx.fill();
 		
 		// body		
-		ctx.fillStyle = "brown"
+		ctx.fillStyle = PECK.colouring("body");
 		ctx.beginPath();
 		ctx.moveTo(bodyX, bodyY);
 		ctx.lineTo(bodyX, bodyY+16);
@@ -419,7 +478,7 @@ PECK.chicken = {
 		ctx.fill();
 		
 		// feet
-		ctx.fillStyle = "orange";
+		ctx.fillStyle = PECK.colouring("beaksnfeet");;
 		ctx.beginPath();
 		ctx.moveTo(bodyX + (2*m), bodyY+16);
 		ctx.lineTo(bodyX + (1*m), bodyY+20);
@@ -439,7 +498,7 @@ PECK.chicken = {
 		var bodyY = this.y+8;
 		
 		// body
-		ctx.fillStyle = "brown"
+		ctx.fillStyle = PECK.colouring("body");
 		ctx.beginPath();
 		ctx.moveTo(bodyX, bodyY);
 		ctx.lineTo(bodyX + (10*m), bodyY+8);
@@ -447,7 +506,7 @@ PECK.chicken = {
 		ctx.fill();
 		
 		// beak
-		ctx.fillStyle = "orange";
+		ctx.fillStyle = PECK.colouring("beaksnfeet");
 		ctx.beginPath();
 		ctx.moveTo(bodyX, bodyY);
 		ctx.lineTo(bodyX + (3*m), bodyY+8);
@@ -455,7 +514,7 @@ PECK.chicken = {
 		ctx.fill();
 		
 		// feet
-		ctx.fillStyle = "orange";
+		ctx.fillStyle = PECK.colouring("beaksnfeet");
 		ctx.beginPath();
 		if (frame === 0)
 		{
@@ -614,14 +673,23 @@ PECK.peckOnClick = function (e) {
 // *** Game loop ***
 
 // game_loop prints and updates the full yard of chickens
-PECK.game_loop = function (ctx) {
+PECK.game_loop = function (ctx, counter) {
     	
+	// handle yard updates
 	PECK.yard.chickens.forEach (function (c) { c.update (); });
 	PECK.yard.check_for_grain_collision();
 	PECK.yard.can_chickens_see_grains();
 	PECK.yard.draw();
 	
-	var t = setTimeout(PECK.game_loop, 10, ctx);
+	// handle time updates
+	counter += 1;
+	if (counter > 300)
+	{
+		PECK.infobar.increment_time();
+		counter = 0;
+	}
+	
+	var t = setTimeout(PECK.game_loop, 10, ctx, counter);
 };
 
 
@@ -643,6 +711,6 @@ PECK.setup = function () {
 		PECK.yard.add_chicken (PECK.chicken_creator ({ name: n, heading: PECK.make_heading() }));
 	});
 
-	PECK.game_loop (ctx);
+	PECK.game_loop (ctx, 0);
 };	
 
