@@ -32,8 +32,8 @@ var yard = {
 		this.infobar = Object.beget (infobar);
 		
 		this.infobar.x = 0;
-		this.infobar.y = 300;
-		this.infobar.width = 500;
+		this.infobar.y = this.height;
+		this.infobar.width = this.width;
 		this.infobar.height = 100;
 	},
 	
@@ -118,13 +118,12 @@ var yard = {
 	check_for_mouse_on_chickens: function () {
 		if (this.mouse_state === undefined)
 		{
-			console.log("Mouse undefined");
 			return;
 		}
 
 		var that = this;
-		console.log(this.mouse_state);
-		console.log(this.chickens[0]);
+		//console.log(this.mouse_state);
+		//console.log(this.chickens[0]);
 		this.chickens.forEach (function (c) { 
 			if (approx_equals (c.x, that.mouse_state.x, 25) &&
 			    approx_equals (c.y+c.height, that.mouse_state.y, 25))
@@ -235,56 +234,32 @@ var dropGrain = function (position) {
 
 // *** Chicken-related items ***
 // Chicken behaviours: markov_chain for normal activities, chase behaviour for grain
+
 var markov_chain = {
+	moves: ["standing", "bok", "peck", "walk", "scratch"],
+	transitions: {
+		"standing": [10, 20, 10, 40, 20],
+		"bok":      [50, 50,  0,  0,  0],
+		"peck":     [20,  0, 50,  0, 30],
+		"walk":     [30,  0,  0, 70,  0],
+		"scratch":  [20,  0, 20,  0, 60]
+	},
 	move: "standing",
 	
 	next_move: function () {
 		//console.log ("In next_move, current value " + this.move);
 		var p = rand(100);
-		if (this.move === "standing")
+		var nexts = this.transitions[this.move];
+		var i;
+		var q = 0; // q is the interim probability between 0 and p
+		for (i = 0; i < nexts.length; i++)
 		{
-			if (p < 10)
-				this.move = "standing";
-			else if (p < 20)
-				this.move = "peck";
-			else if (p < 60)
-				this.move = "walk";
-			else if (p < 80)
-			    this.move = "scratch";
-			else
-			    this.move = "bok";
-		}
-		else if (this.move === "bok")
-		{
-			if (p < 50)
-			    this.move = "bok";
-			else 
-			    this.move = "standing";
-		}
-		else if (this.move === "peck")
-		{
-			if (p < 50)
-				this.move = "peck";
-			else if (p < 70)
-				this.move = "standing";
-			else
-			    this.move = "scratch";
-		}
-		else if (this.move === "walk")
-		{
-			if (p < 70)
-				this.move = "walk";
-			else
-			    this.move = "standing";
-		}
-		else if (this.move === "scratch")
-		{
-			if (p < 60)
-				this.move = "scratch";
-			else if (p < 80)
-				this.move = "standing";
-			else
-			    this.move = "peck";
+			if (p < (nexts[i] + q))
+			{
+				this.move = this.moves[i];
+				break;
+			}
+			q += nexts[i];
 		}
 	}
 };
@@ -622,7 +597,7 @@ var getCursorPosition = function (e) {
 
     if (x < 0 || y < 0 || x > yard.width || y > yard.height)
     {
-        console.log("Out of bounds (" + x + "," + y + ")");
+        //console.log("Out of bounds (" + x + "," + y + ")");
         return undefined;
     }
 
