@@ -258,43 +258,6 @@ PECK.infobar = {
 	}
 }
 
-// *** Grain ***
-// Grain is a placable and eatable object, dropped in a user-generated grain drop
-PECK.grain = {
-	x: 0,
-	y: 0,
-	
-	draw: function (ctx) {
-		ctx.fillStyle = PECK.colouring ("body");
-		ctx.beginPath();
-		ctx.moveTo(this.x, this.y);
-		ctx.lineTo(this.x+1, this.y);
-		ctx.lineTo(this.x+1, this.y+1);
-		ctx.lineTo(this.x, this.y+1);
-		ctx.fill();
-	}
-}
-
-PECK.generate_grain = function (x, y) {
-	var g = Object.beget(PECK.grain);
-	g.x = x || PECK.grain.x;
-	g.y = y || PECK.grain.y;
-	return g;
-};
-
-PECK.dropGrain = function (position) {
-	// position has x and y, which is the centre of the 10x10 grain drop
-	var startX = position.x - 5;
-	var startY = position.y - 5;
-	
-	// drop 10 bits of grain
-	for (var i = 0; i < 10; i += 1)
-	{
-		PECK.yard.add_grain (PECK.generate_grain(startX+PECK.rand(10), startY+PECK.rand(10)));
-	}
-	PECK.yard.draw();
-}
-
 
 // *** Chicken-related items ***
 // Chicken behaviours: markov_chain for normal activities, chase behaviour for grain
@@ -668,15 +631,32 @@ PECK.getCursorPosition = function (e) {
     return { "x": x, "y": y };
 };
 
-PECK.peckOnClick = function (e) {
+PECK.dropGrainOnClick = function (e) {
     var position = PECK.getCursorPosition(e);
-
     if (position === undefined) {
         return;
     }
 
-    //console.log ("Dropping grain at (" + position.x + "," + position.y + ")");
-    PECK.dropGrain(position);
+	// Drop n grains in an nxn square centered on position's x and y
+	var n = 10;
+	for (var i = 0; i < n; i += 1)
+	{
+		PECK.yard.add_grain ( {
+			x: position.x - n/2 + PECK.rand (n), // centered on click
+			y: position.y - n/2 + PECK.rand (n), // centered on click
+
+			draw: function (ctx) {
+				ctx.fillStyle = PECK.colouring ("grain");
+				ctx.beginPath();
+				ctx.moveTo(this.x, this.y);
+				ctx.lineTo(this.x+1, this.y);
+				ctx.lineTo(this.x+1, this.y+1);
+				ctx.lineTo(this.x, this.y+1);
+				ctx.fill();
+			}
+		});
+	}
+	PECK.yard.draw();
 };
 
 
@@ -713,7 +693,7 @@ PECK.setup = function () {
 
 	PECK.yard.set_ctx (ctx);
 
-    canvas.addEventListener("click", PECK.peckOnClick, false);
+    canvas.addEventListener("click", PECK.dropGrainOnClick, false);
 	canvas.addEventListener("mousemove", function (e) {
 		PECK.yard.set_mouse(PECK.getCursorPosition(e));
 	}, false);
