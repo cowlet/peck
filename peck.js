@@ -291,312 +291,303 @@ PECK.markov_chain = {
 	}
 };
 
-// Chicken helper functions
-PECK.make_heading = function () {
-	return PECK.rand(360);
-}
 
-// Chicken object
-PECK.chicken = {
-	x: 0,
-	y: 0,
-	height: 20,
-	heading: 270,
-	name: "Chicken E. Bok",
-	frame: 0,
-	chasing: false,
-	time_to_update: 0,
+PECK.chicken_creator = function (n) {
+	return {
+		name: n,
+		x: PECK.rand (PECK.yard.width),
+		y: PECK.rand (PECK.yard.height),
+		height: 20,
+		heading: PECK.rand (360),
+		frame: 0,
+		chasing: false,
+		time_to_update: 0,
+		
+		behaviour: Object.beget(PECK.markov_chain),
 	
-	direction: function () {
-		return (this.heading < 180 ? "east" : "west");
-	},
+		direction: function () {
+			return (this.heading < 180 ? "east" : "west");
+		},
 	
-	rad_heading: function () {
-		return this.heading * Math.PI / 180;
-	},
+		rad_heading: function () {
+			return this.heading * Math.PI / 180;
+		},
 	
-	update_chase_heading: function () {
-		// at x,y going to chasing.x,chasing.y
-		var h = PECK.rand(90);
+		update_chase_heading: function () {
+			// at x,y going to chasing.x,chasing.y
+			var h = PECK.rand(90);
 		
-		// generate a new heading into the quadrant of the chase
-		if (this.chasing)
-		{
-			if (this.chasing.x > this.x && this.chasing.y < this.y)
-				this.heading = h;
-			else if (this.chasing.x > this.x && this.chasing.y > this.y)
-				this.heading = 90+h;
-			else if (this.chasing.x < this.x && this.chasing.y > this.y)
-				this.heading = 180+h;
-			else
-				this.heading = 270+h;
-		}
-	},
-	
-	can_see: function (grain) {
-		if (this.direction() === "west" && (grain.x < this.x) ||
-		    this.direction() === "east" && (grain.x > this.x))
-		{
-			if (PECK.approx_equals (this.x, grain.x, 25) &&
-			    PECK.approx_equals (this.y+this.height, grain.y, 25))
-			{
-				//console.log (this.name + " can see grain");
-				return true;
-			}
-		}
-		return false;
-	},
-	
-	standing_near: function (grain) {
-		if (PECK.approx_equals (this.x, grain.x, 5) &&
-		    PECK.approx_equals (this.y+this.height, grain.y, 5))
-		{
-			//console.log (this.name + " is near grain");
-			return true;
-		}
-		return false;
-	},
-	
-	draw_facing: function (ctx) {
-		var bodyX = this.x;
-		var bodyY = this.y;
-		// multiplier is pos or neg depending on direction of facing
-		// affects x offsets only
-		var m = (this.direction() === "west" ? 1 : -1);
-		
-		// beak
-		ctx.fillStyle = PECK.colouring("beaksnfeet");
-		ctx.beginPath();
-		ctx.moveTo(bodyX, bodyY);
-		ctx.lineTo(bodyX + (-4*m), bodyY+4);
-		ctx.lineTo(bodyX, bodyY+8);
-		ctx.fill();
-		
-		// body		
-		ctx.fillStyle = PECK.colouring("body");
-		ctx.beginPath();
-		ctx.moveTo(bodyX, bodyY);
-		ctx.lineTo(bodyX, bodyY+16);
-		ctx.lineTo(bodyX + (8*m), bodyY+16);
-		ctx.fill();
-		
-		// feet
-		ctx.fillStyle = PECK.colouring("beaksnfeet");
-		ctx.beginPath();
-		ctx.moveTo(bodyX + (4*m), bodyY+16);
-		ctx.lineTo(bodyX + (2*m), bodyY+20);
-		ctx.lineTo(bodyX + (6*m), bodyY+20);
-		ctx.fill();
-	},
-	
-	
-	draw_bokking: function (ctx) {
-		this.draw_facing (ctx);
-		ctx.fillStyle = PECK.colouring("text");
-	    ctx.font = "9px sans-serif";
-	    ctx.textBaseline = "top";
-
-	    var xpos = (this.direction() === "west" ? this.x-24 : this.x+6);
-	    ctx.fillText("bok!", xpos, this.y);
-	},
-	
-	draw_pecking: function (ctx) {
-		var m = (this.direction() === "west" ? 1 : -1);
-		var bodyX = this.x - (12*m);
-		var bodyY = this.y+11;
-		
-		// body
-		ctx.fillStyle = PECK.colouring("body");
-		ctx.beginPath();
-		ctx.moveTo(bodyX, bodyY);
-		ctx.lineTo(bodyX + (12*m), bodyY+5);
-		ctx.lineTo(bodyX + (18*m), bodyY);
-		ctx.fill();
-		
-		// beak
-		ctx.fillStyle = PECK.colouring("beaksnfeet");
-		ctx.beginPath();
-		ctx.moveTo(bodyX, bodyY);
-		ctx.lineTo(bodyX + (3*m), bodyY+8);
-		ctx.lineTo(bodyX + (6*m), bodyY+3);
-		ctx.fill();
-		
-		// feet
-		ctx.fillStyle = PECK.colouring("beaksnfeet");
-		ctx.beginPath();
-		ctx.moveTo(bodyX + (15*m), this.y+16);
-		ctx.lineTo(bodyX + (13*m), this.y+20);
-		ctx.lineTo(bodyX + (17*m), this.y+20);
-		ctx.fill();
-	},
-	
-	draw_walking: function (ctx) {
-		var bodyX = this.x;
-		var bodyY = this.y;
-		var m = (this.direction() === "west" ? 1 : -1);
-		
-		// beak
-		ctx.fillStyle = PECK.colouring("beaksnfeet");
-		ctx.beginPath();
-		ctx.moveTo(bodyX, bodyY);
-		ctx.lineTo(bodyX + (-4*m), bodyY+4);
-		ctx.lineTo(bodyX, bodyY+8);
-		ctx.fill();
-		
-		// body		
-		ctx.fillStyle = PECK.colouring("body");
-		ctx.beginPath();
-		ctx.moveTo(bodyX, bodyY);
-		ctx.lineTo(bodyX, bodyY+16);
-		ctx.lineTo(bodyX + (8*m), bodyY+16);
-		ctx.fill();
-		
-		// feet
-		ctx.fillStyle = PECK.colouring("beaksnfeet");;
-		ctx.beginPath();
-		ctx.moveTo(bodyX + (2*m), bodyY+16);
-		ctx.lineTo(bodyX + (1*m), bodyY+20);
-		ctx.lineTo(bodyX + (3*m), bodyY+20);
-		ctx.fill();
-		ctx.beginPath();
-		ctx.moveTo(bodyX + (5*m), bodyY+16);
-		ctx.lineTo(bodyX + (4*m), bodyY+20);
-		ctx.lineTo(bodyX + (6*m), bodyY+20);
-		ctx.fill();
-	},
-		
-	
-	draw_scratching: function (ctx, frame) {
-		var m = (this.direction() === "west" ? 1 : -1);
-		var bodyX = this.x - (8*m);
-		var bodyY = this.y+8;
-		
-		// body
-		ctx.fillStyle = PECK.colouring("body");
-		ctx.beginPath();
-		ctx.moveTo(bodyX, bodyY);
-		ctx.lineTo(bodyX + (10*m), bodyY+8);
-		ctx.lineTo(bodyX + (18*m), bodyY+5);
-		ctx.fill();
-		
-		// beak
-		ctx.fillStyle = PECK.colouring("beaksnfeet");
-		ctx.beginPath();
-		ctx.moveTo(bodyX, bodyY);
-		ctx.lineTo(bodyX + (3*m), bodyY+8);
-		ctx.lineTo(bodyX + (6*m), bodyY+3);
-		ctx.fill();
-		
-		// feet
-		ctx.fillStyle = PECK.colouring("beaksnfeet");
-		ctx.beginPath();
-		if (frame === 0)
-		{
-			ctx.moveTo(bodyX + (13*m), this.y+16);
-			ctx.lineTo(bodyX + (11*m), this.y+20);
-			ctx.lineTo(bodyX + (15*m), this.y+20);
-			ctx.fill();
-		}
-		else
-		{
-			ctx.moveTo(bodyX + (13*m), this.y+16);
-			ctx.lineTo(bodyX + (11*m), this.y+20);
-			ctx.lineTo(bodyX + (13*m), this.y+20);
-			ctx.fill();
-			ctx.beginPath();
-			ctx.moveTo(bodyX + (13*m), this.y+16);
-			ctx.lineTo(bodyX + (17*m), this.y+18);
-			ctx.lineTo(bodyX + (18*m), this.y+16);
-			ctx.fill();
-		}
-	},
-	
-	update_position: function () {
-		
-		//console.log (this.name + " is currently at (" + this.x + "," + this.y + ") heading " + this.heading);
-		// chickens move 10 pix
-		this.x += 10 * Math.sin(this.rad_heading());
-		this.y -= 10 * Math.cos(this.rad_heading());
-		//console.log (this.name + " is now at (" + this.x + "," + this.y + ")");
-	},
-	
-	
-	select_frame: function (ctx, move, frame) {
-		//console.log ("Selecting frame for " + move + ", " +frame);
-		if (frame === 0)
-		{
-			if (move === "standing")
-			    this.draw_facing(ctx);
-			else if (move === "peck")
-			    this.draw_pecking(ctx);
-			else if (move === "bok")
-			    this.draw_bokking(ctx);
-			else if (move === "walk")
-			    this.draw_walking(ctx);
-            else if (move === "scratch")
-                this.draw_scratching(ctx, frame);
-		}
-		else
-		{
-			if (move === "scratch")
-                this.draw_scratching(ctx, frame);
-			else
-			    this.draw_facing(ctx);
-			// standing, peck, walk, bok all have the same off frame
-		}
-	},
-	
-	draw: function (ctx) {
-		//console.log ("Drawing move " + this.behaviour.move);
-		
-		this.select_frame(ctx, this.behaviour.move, this.frame);
-	},
-	
-	update: function () {
-		// decrement hysteresis counter before deciding to update
-		this.time_to_update -= 1;
-		
-		if (this.time_to_update <= 0)
-		{
-			//console.log("Updating " + this.name);
+			// generate a new heading into the quadrant of the chase
 			if (this.chasing)
 			{
-				// head to the chased position
-	            this.update_chase_heading();
-			
-				this.behaviour.move = "walk";
-				this.frame ? this.frame = 0 : this.frame = 1;
-				this.update_position();
+				if (this.chasing.x > this.x && this.chasing.y < this.y)
+					this.heading = h;
+				else if (this.chasing.x > this.x && this.chasing.y > this.y)
+					this.heading = 90+h;
+				else if (this.chasing.x < this.x && this.chasing.y > this.y)
+					this.heading = 180+h;
+				else
+					this.heading = 270+h;
 			}
-			else // normal behaviour
-			{
-				//console.log("heading for " + this.name + " was " + this.heading);
-				if (!PECK.rand(5)) // 1 in 5 times, change direction
-					this.heading = PECK.make_heading();
-				//console.log("heading for " + this.name + " is now " + this.heading);
-		
-				this.behaviour.next_move ();
-				this.frame ? this.frame = 0 : this.frame = 1;
-				if (this.behaviour.move === "walk")
-				    this.update_position();
-			}
-			
-			// reset update counter
-			this.time_to_update = 50 + PECK.rand(50);
-		}
-	}
+		},
 	
+		can_see: function (grain) {
+			if (this.direction() === "west" && (grain.x < this.x) ||
+			    this.direction() === "east" && (grain.x > this.x))
+			{
+				if (PECK.approx_equals (this.x, grain.x, 25) &&
+				    PECK.approx_equals (this.y+this.height, grain.y, 25))
+				{
+					//console.log (this.name + " can see grain");
+					return true;
+				}
+			}
+			return false;
+		},
+	
+		standing_near: function (grain) {
+			if (PECK.approx_equals (this.x, grain.x, 5) &&
+			    PECK.approx_equals (this.y+this.height, grain.y, 5))
+			{
+				//console.log (this.name + " is near grain");
+				return true;
+			}
+			return false;
+		},
+	
+		draw_facing: function (ctx) {
+			var bodyX = this.x;
+			var bodyY = this.y;
+			// multiplier is pos or neg depending on direction of facing
+			// affects x offsets only
+			var m = (this.direction() === "west" ? 1 : -1);
+		
+			// beak
+			ctx.fillStyle = PECK.colouring("beaksnfeet");
+			ctx.beginPath();
+			ctx.moveTo(bodyX, bodyY);
+			ctx.lineTo(bodyX + (-4*m), bodyY+4);
+			ctx.lineTo(bodyX, bodyY+8);
+			ctx.fill();
+		
+			// body		
+			ctx.fillStyle = PECK.colouring("body");
+			ctx.beginPath();
+			ctx.moveTo(bodyX, bodyY);
+			ctx.lineTo(bodyX, bodyY+16);
+			ctx.lineTo(bodyX + (8*m), bodyY+16);
+			ctx.fill();
+		
+			// feet
+			ctx.fillStyle = PECK.colouring("beaksnfeet");
+			ctx.beginPath();
+			ctx.moveTo(bodyX + (4*m), bodyY+16);
+			ctx.lineTo(bodyX + (2*m), bodyY+20);
+			ctx.lineTo(bodyX + (6*m), bodyY+20);
+			ctx.fill();
+		},
+	
+	
+		draw_bokking: function (ctx) {
+			this.draw_facing (ctx);
+			ctx.fillStyle = PECK.colouring("text");
+		    ctx.font = "9px sans-serif";
+		    ctx.textBaseline = "top";
+
+		    var xpos = (this.direction() === "west" ? this.x-24 : this.x+6);
+		    ctx.fillText("bok!", xpos, this.y);
+		},
+	
+		draw_pecking: function (ctx) {
+			var m = (this.direction() === "west" ? 1 : -1);
+			var bodyX = this.x - (12*m);
+			var bodyY = this.y+11;
+		
+			// body
+			ctx.fillStyle = PECK.colouring("body");
+			ctx.beginPath();
+			ctx.moveTo(bodyX, bodyY);
+			ctx.lineTo(bodyX + (12*m), bodyY+5);
+			ctx.lineTo(bodyX + (18*m), bodyY);
+			ctx.fill();
+		
+			// beak
+			ctx.fillStyle = PECK.colouring("beaksnfeet");
+			ctx.beginPath();
+			ctx.moveTo(bodyX, bodyY);
+			ctx.lineTo(bodyX + (3*m), bodyY+8);
+			ctx.lineTo(bodyX + (6*m), bodyY+3);
+			ctx.fill();
+		
+			// feet
+			ctx.fillStyle = PECK.colouring("beaksnfeet");
+			ctx.beginPath();
+			ctx.moveTo(bodyX + (15*m), this.y+16);
+			ctx.lineTo(bodyX + (13*m), this.y+20);
+			ctx.lineTo(bodyX + (17*m), this.y+20);
+			ctx.fill();
+		},
+	
+		draw_walking: function (ctx) {
+			var bodyX = this.x;
+			var bodyY = this.y;
+			var m = (this.direction() === "west" ? 1 : -1);
+		
+			// beak
+			ctx.fillStyle = PECK.colouring("beaksnfeet");
+			ctx.beginPath();
+			ctx.moveTo(bodyX, bodyY);
+			ctx.lineTo(bodyX + (-4*m), bodyY+4);
+			ctx.lineTo(bodyX, bodyY+8);
+			ctx.fill();
+		
+			// body		
+			ctx.fillStyle = PECK.colouring("body");
+			ctx.beginPath();
+			ctx.moveTo(bodyX, bodyY);
+			ctx.lineTo(bodyX, bodyY+16);
+			ctx.lineTo(bodyX + (8*m), bodyY+16);
+			ctx.fill();
+		
+			// feet
+			ctx.fillStyle = PECK.colouring("beaksnfeet");;
+			ctx.beginPath();
+			ctx.moveTo(bodyX + (2*m), bodyY+16);
+			ctx.lineTo(bodyX + (1*m), bodyY+20);
+			ctx.lineTo(bodyX + (3*m), bodyY+20);
+			ctx.fill();
+			ctx.beginPath();
+			ctx.moveTo(bodyX + (5*m), bodyY+16);
+			ctx.lineTo(bodyX + (4*m), bodyY+20);
+			ctx.lineTo(bodyX + (6*m), bodyY+20);
+			ctx.fill();
+		},
+		
+	
+		draw_scratching: function (ctx, frame) {
+			var m = (this.direction() === "west" ? 1 : -1);
+			var bodyX = this.x - (8*m);
+			var bodyY = this.y+8;
+		
+			// body
+			ctx.fillStyle = PECK.colouring("body");
+			ctx.beginPath();
+			ctx.moveTo(bodyX, bodyY);
+			ctx.lineTo(bodyX + (10*m), bodyY+8);
+			ctx.lineTo(bodyX + (18*m), bodyY+5);
+			ctx.fill();
+		
+			// beak
+			ctx.fillStyle = PECK.colouring("beaksnfeet");
+			ctx.beginPath();
+			ctx.moveTo(bodyX, bodyY);
+			ctx.lineTo(bodyX + (3*m), bodyY+8);
+			ctx.lineTo(bodyX + (6*m), bodyY+3);
+			ctx.fill();
+		
+			// feet
+			ctx.fillStyle = PECK.colouring("beaksnfeet");
+			ctx.beginPath();
+			if (frame === 0)
+			{
+				ctx.moveTo(bodyX + (13*m), this.y+16);
+				ctx.lineTo(bodyX + (11*m), this.y+20);
+				ctx.lineTo(bodyX + (15*m), this.y+20);
+				ctx.fill();
+			}
+			else
+			{
+				ctx.moveTo(bodyX + (13*m), this.y+16);
+				ctx.lineTo(bodyX + (11*m), this.y+20);
+				ctx.lineTo(bodyX + (13*m), this.y+20);
+				ctx.fill();
+				ctx.beginPath();
+				ctx.moveTo(bodyX + (13*m), this.y+16);
+				ctx.lineTo(bodyX + (17*m), this.y+18);
+				ctx.lineTo(bodyX + (18*m), this.y+16);
+				ctx.fill();
+			}
+		},
+	
+		update_position: function () {
+		
+			//console.log (this.name + " is currently at (" + this.x + "," + this.y + ") heading " + this.heading);
+			// chickens move 10 pix
+			this.x += 10 * Math.sin(this.rad_heading());
+			this.y -= 10 * Math.cos(this.rad_heading());
+			//console.log (this.name + " is now at (" + this.x + "," + this.y + ")");
+		},
+	
+	
+		select_frame: function (ctx, move, frame) {
+			//console.log ("Selecting frame for " + move + ", " +frame);
+			if (frame === 0)
+			{
+				if (move === "standing")
+				    this.draw_facing(ctx);
+				else if (move === "peck")
+				    this.draw_pecking(ctx);
+				else if (move === "bok")
+				    this.draw_bokking(ctx);
+				else if (move === "walk")
+				    this.draw_walking(ctx);
+	            else if (move === "scratch")
+	                this.draw_scratching(ctx, frame);
+			}
+			else
+			{
+				if (move === "scratch")
+	                this.draw_scratching(ctx, frame);
+				else
+				    this.draw_facing(ctx);
+				// standing, peck, walk, bok all have the same off frame
+			}
+		},
+	
+		draw: function (ctx) {
+			//console.log ("Drawing move " + this.behaviour.move);
+		
+			this.select_frame(ctx, this.behaviour.move, this.frame);
+		},
+	
+		update: function () {
+			// decrement hysteresis counter before deciding to update
+			this.time_to_update -= 1;
+		
+			if (this.time_to_update <= 0)
+			{
+				//console.log("Updating " + this.name);
+				if (this.chasing)
+				{
+					// head to the chased position
+		            this.update_chase_heading();
+			
+					this.behaviour.move = "walk";
+					this.frame ? this.frame = 0 : this.frame = 1;
+					this.update_position();
+				}
+				else // normal behaviour
+				{
+					//console.log("heading for " + this.name + " was " + this.heading);
+					if (!PECK.rand(5)) // 1 in 5 times, change direction
+						this.heading = PECK.rand (360);
+					//console.log("heading for " + this.name + " is now " + this.heading);
+		
+					this.behaviour.next_move ();
+					this.frame ? this.frame = 0 : this.frame = 1;
+					if (this.behaviour.move === "walk")
+					    this.update_position();
+				}
+			
+				// reset update counter
+				this.time_to_update = 50 + PECK.rand(50);
+			}
+		}
+	
+	};
 };
 
-PECK.chicken_creator = function (attributes) {
-	var chick = Object.beget(PECK.chicken);
-	chick.heading = attributes.heading || PECK.chicken.heading;
-	chick.behaviour = Object.beget(PECK.markov_chain);
-	chick.name = attributes.name || PECK.chicken.name;
-	chick.x = PECK.rand (PECK.yard.width) || PECK.chicken.x;
-	chick.y = PECK.rand (PECK.yard.height) || PECK.chicken.y;
-	return chick;
-};
+
 
 
 // User interaction
@@ -699,7 +690,7 @@ PECK.setup = function () {
 	}, false);
 	
 	["Henrietta", "Henelope", "Henderson", "Hencules", "Hendrick"].forEach (function (n) {
-		PECK.yard.add_chicken (PECK.chicken_creator ({ name: n, heading: PECK.make_heading() }));
+		PECK.yard.add_chicken (PECK.chicken_creator (n));
 	});
 
 	PECK.game_loop (ctx, 0);
