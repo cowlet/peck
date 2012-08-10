@@ -263,31 +263,50 @@ PECK.infobar = {
 // Chicken behaviours: markov_chain for normal activities, chase behaviour for grain
 
 PECK.markov_chain = {
-	moves: ["standing", "bok", "peck", "walk", "scratch"],
+	moves: ["standing", "bok", "peck", "walk", "scratch", "chase"],
 	transitions: {
-		"standing": [10, 20, 10, 40, 20],
-		"bok":      [50, 50,  0,  0,  0],
-		"peck":     [20,  0, 50,  0, 30],
-		"walk":     [30,  0,  0, 70,  0],
-		"scratch":  [20,  0, 20,  0, 60]
+		"standing": [10, 20, 10, 40,  20],
+		"bok":      [50, 50,  0,  0,   0],
+		"peck":     [20,  0, 50,  0,  30],
+		"walk":     [30,  0,  0, 70,   0],
+		"scratch":  [20,  0, 20,  0,  60],
+		"chase":    [ 0,  0,  0,  0, 100]
 	},
 	move: "standing",
 	
 	next_move: function () {
 		//console.log ("In next_move, current value " + this.move);
 		var p = PECK.rand(100);
-		var nexts = this.transitions[this.move];
-		var i;
-		var q = 0; // q is the interim probability between 0 and p
-		for (i = 0; i < nexts.length; i++)
-		{
-			if (p < (nexts[i] + q))
+		
+		var line = this.transitions[this.move];	
+		var partial_sums = line.map (function (value) { 
+			return this.total += value;
+		}, {total: 0});
+		console.log ("For move " + this.move + ", partials are " + partial_sums.toString());
+		
+		var that = this;
+		partial_sums.some (function (total, i) {
+			if (p >= total)
 			{
-				this.move = this.moves[i];
-				break;
+				console.log ("Returning true");
+				that.move = that.moves[i];
+				return true;
 			}
-			q += nexts[i];
-		}
+			return false;
+		});
+		console.log ("New move for p = " + p + " is " + this.move);
+		
+		//var nexts = this.transitions[this.move];
+		//var q = 0; // q is the interim probability between 0 and p
+		//for (var i = 0; i < nexts.length; i++)
+		//{
+		//	if (p < (nexts[i] + q))
+		//	{
+		//		this.move = this.moves[i];
+		//		break;
+		//	}
+		//	q += nexts[i];
+		//}
 	}
 };
 
