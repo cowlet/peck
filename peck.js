@@ -275,38 +275,20 @@ PECK.markov_chain = {
 	move: "standing",
 	
 	next_move: function () {
-		//console.log ("In next_move, current value " + this.move);
 		var p = PECK.rand(100);
-		
-		var line = this.transitions[this.move];	
-		var partial_sums = line.map (function (value) { 
-			return this.total += value;
-		}, {total: 0});
-		console.log ("For move " + this.move + ", partials are " + partial_sums.toString());
-		
 		var that = this;
-		partial_sums.some (function (total, i) {
-			if (p >= total)
+		// For the correct row of transitions, sum elements one by
+		// one until we find the partial_sum greater or equal to p		
+		this.transitions[this.move].some (function (value, i) {
+			this.partial_sum += value;
+			if (p <= this.partial_sum)
 			{
-				console.log ("Returning true");
+				//console.log ("Move for p = " + p + " should be to " + that.moves[i]);
 				that.move = that.moves[i];
 				return true;
 			}
 			return false;
-		});
-		console.log ("New move for p = " + p + " is " + this.move);
-		
-		//var nexts = this.transitions[this.move];
-		//var q = 0; // q is the interim probability between 0 and p
-		//for (var i = 0; i < nexts.length; i++)
-		//{
-		//	if (p < (nexts[i] + q))
-		//	{
-		//		this.move = this.moves[i];
-		//		break;
-		//	}
-		//	q += nexts[i];
-		//}
+		}, {partial_sum: 0});
 	}
 };
 
