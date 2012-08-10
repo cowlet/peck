@@ -45,7 +45,7 @@ PECK.yard = {
 	is_grain_around: function (c) {
 		// can chicken c eat grain
 		var that = this;
-		this.grains.forEach (function (g) {			
+		this.grains.some (function (g) {			
 			// can chicken see grain
 			if (c.can_see (g) || c.standing_near (g))
 			{
@@ -56,12 +56,13 @@ PECK.yard = {
 			if (PECK.approx_equals (c.x, g.x, 5) &&
 			    PECK.approx_equals (c.y+c.height, g.y, 5))
 			{
-				console.log ("Chicken " + c.name + " is eating grain " + that.grains.indexOf(g));
+				//console.log ("Chicken " + c.name + " is eating grain " + that.grains.indexOf(g));
 				c.stop_chase (true);
 				that.grains.splice (that.grains.indexOf (g), 1); // delete grain
 				// eating is highest priority: don't look for more grain
-				return;
-			}
+				return true;
+			};
+			return false;
 		});
 		
 		// if there is no more grain, stop the chase
@@ -254,6 +255,7 @@ PECK.chicken_creator = function (n) {
 		
 			if (this.time_to_update <= 0)
 			{
+				//console.log ("Chicken is updating");
 				this.behaviour.next_move ();
 				PECK.yard.is_grain_around (this);
 				this.update_heading ();
@@ -341,7 +343,6 @@ PECK.game_loop = function (counter) {
 
 
 // *** Starting point ***
-
 PECK.setup = function () {	
 
 	var canvas = document.getElementById("canvas");
