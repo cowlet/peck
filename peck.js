@@ -82,61 +82,35 @@ PECK.yard = {
 		this.chickens.forEach (function (c) { c.start_chase({ "x": g.x, "y": g.y-c.height }); });
 	},
 	
-	check_for_grain_collision: function () {
-
-		var eaten_grains = [];
-		var available_chickens = this.chickens.slice(0); // copy all chickens
+	is_grain_around: function (c) {
+		// can chicken c eat grain
 		var that = this;
-		
-		// match up each grain to one or zero chickens from the pool of non-eating chickens
-		this.grains.forEach (function (g) {
-			var eating_chickens = available_chickens.filter (function (c) {
-				if (PECK.approx_equals (c.x, g.x, 5) &&
-				    PECK.approx_equals (c.y+c.height, g.y, 5))
-				{
-					console.log ("returning true for hit");
-					return true;
-				}
-				return false;
-			});
-			
-			// if one matches, just take the first one
-			if (eating_chickens[0])
+		this.grains.forEach (function (g) {			
+			// can chicken see grain
+			if (c.can_see (g) || c.standing_near (g))
 			{
-				// eat
-				eating_chickens[0].stop_chase();
-				eating_chickens[0].behaviour.move = "peck";
-				// delete chicken from available
-				available_chickens.splice (available_chickens.indexOf(eating_chickens[0]), 1);
-				// shcedule grain for removal
-				eaten_grains.push (g);
+				c.start_chase ({ "x": g.x, "y": g.y-c.height });
+			};
+			
+			// can chicken eat grain
+			if (PECK.approx_equals (c.x, g.x, 5) &&
+			    PECK.approx_equals (c.y+c.height, g.y, 5))
+			{
+				console.log ("Chicken " + c.name + " is eating grain " + that.grains.indexOf(g));
+				c.stop_chase (true);
+				that.grains.splice (that.grains.indexOf (g), 1); // delete grain
+				// eating is highest priority: don't look for more grain
+				return;
 			}
 		});
 		
-		eaten_grains.forEach (function (g) { that.grains.splice (that.grains.indexOf (g), 1); });
-	},
-	
-	can_chickens_see_grains: function () {
-		var i, j;
-		
-		// if there are no grains, stop all chases
+		// if there is no more grain, stop the chase
 		if (this.grains.length === 0)
 		{
-			this.chickens.forEach (function (c) { c.stop_chase(); });
+			c.stop_chase (false);
 		}
-		
-		var that = this;
-		// loop through chickens. if they can see a grain, chase
-		this.chickens.forEach (function (c) {
-			that.grains.forEach (function (g) {
-				if (c.can_see (g) || c.standing_near (g))
-				{
-					c.start_chase ({ "x": g.x, "y": g.y-c.height });
-				}
-			});
-		});
-				
 	},
+	
 	
 	check_for_mouse_on_chickens: function () {
 		if (this.mouse_state === undefined)
@@ -320,12 +294,17 @@ PECK.chicken_creator = function (n) {
 			this.behaviour.move = "chase";
 		},
 		
-		stop_chase: function () {
+		stop_chase: function (caught) {
 			this.chasing = false;
-			if (this.behaviour.move === "chase")
+			if (caught)
+			{
+				this.behaviour.move = "peck";
+			}
+			else if (this.behaviour.move === "chase")
 			{
 				this.behaviour.move = "standing";
 			};
+			// else, it wasn't chasing, so keep moving as before
 		},
 	
 		update_heading: function () {					
@@ -578,6 +557,7 @@ PECK.chicken_creator = function (n) {
 			if (this.time_to_update <= 0)
 			{
 				this.behaviour.next_move ();
+				PECK.yard.is_grain_around (this);
 				this.update_heading ();
 				this.update_position ();
 				this.frame ? this.frame = 0 : this.frame = 1;
@@ -662,8 +642,6 @@ PECK.game_loop = function (ctx, counter) {
     	
 	// handle yard updates
 	PECK.yard.chickens.forEach (function (c) { c.update (); });
-	PECK.yard.check_for_grain_collision();
-	PECK.yard.can_chickens_see_grains();
 	PECK.yard.draw();
 	
 	// handle time updates
