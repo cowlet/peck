@@ -1,4 +1,5 @@
 #peck {
+	font: 12px "Helvetica", sans-serif;
 	width: 620px;
 	margin: 0 auto;
 }
@@ -7,13 +8,16 @@
 #chicken-info {
 	float: left;
 	width: 428px;
+	height: 160px;
 	padding: 5px;
 	border: 1px solid;
+	overflow: auto;
 }
 
 #farm-info {
 	float: right;
 	width: 168px;
+	height: 160px;
 	padding: 5px;
 	border: 1px solid;
 }
@@ -31,5 +35,5 @@
 
 #chicken-status {
 	float: right;
-	width: 148;
+	width: 120px;
 }
