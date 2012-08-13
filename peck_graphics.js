@@ -59,42 +59,19 @@ PECK.infobar.y_indent = 20;
 PECK.infobar.x_columns = [15, 100, 200, 360];
 
 PECK.infobar.draw = function (chickens) {
-	PECK.GFX.ctx.fillStyle = "black";
-    PECK.GFX.ctx.fillRect(this.x, this.y, this.width, this.height);
-	PECK.GFX.ctx.fillStyle = "white";
-    PECK.GFX.ctx.fillRect(this.x+2, this.y+2, this.width-4, this.height-4);
+	names_html = "";
+	actions_html = "";
 	
-	PECK.GFX.ctx.fillStyle = "black";
-	PECK.GFX.ctx.font = "bold 9px sans-serif";
-    PECK.GFX.ctx.textBaseline = "top";
-	PECK.GFX.ctx.fillText("Name", this.x+this.x_columns[0], this.y+5)
-	PECK.GFX.ctx.fillText("Action", this.x+this.x_columns[1], this.y+5)
-	PECK.GFX.ctx.fillText("Status", this.x+this.x_columns[2], this.y+5)
-
-	var that = this;
-    PECK.GFX.ctx.font = "9px sans-serif";
-	chickens.forEach (function (c, i) {
-		PECK.GFX.ctx.fillText(c.name,
-			         (that.x+that.x_columns[0]),
-			         (that.y+that.y_indent + i*that.line_height));
-		PECK.GFX.ctx.fillText(c.behaviour.move,
-			         (that.x+that.x_columns[1]),
-			         (that.y+that.y_indent + i*that.line_height));
+	chickens.forEach (function (c) {
+		names_html += ("<li>" + c.name + "</li>");
+		actions_html += ("<li>" + c.behaviour.move + "</li>");
 	});
 	
-	PECK.GFX.ctx.fillStyle = "black";
-	PECK.GFX.ctx.fillRect(this.x+this.x_columns[3]-5, this.y, 2, this.height);
-	PECK.GFX.ctx.font = "bold 9px sans-serif";
-    PECK.GFX.ctx.textBaseline = "top";
-    PECK.GFX.ctx.fillText ("Farm", this.x+this.x_columns[3]+this.x_columns[0], this.y+5);
+	document.getElementById("chicken-names-list").innerHTML = names_html;
+	document.getElementById("chicken-actions-list").innerHTML = actions_html;
 	
-	PECK.GFX.ctx.font = "9px sans-serif";
-    PECK.GFX.ctx.fillText ("Day: " + this.day,
-                  this.x+this.x_columns[3]+this.x_columns[0],
-                  this.y+this.y_indent);
-    PECK.GFX.ctx.fillText ("Time: " + this.hour + ":00",
-                  this.x+this.x_columns[3]+this.x_columns[0],
-                  this.y+this.y_indent + this.line_height);  
+	farm_html = "<p>Day: " + this.day + "</p><p>Time: " + this.hour + ":00</p>";
+	document.getElementById("farm-info-text").innerHTML = farm_html;
 };
 
 

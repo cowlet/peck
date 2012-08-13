@@ -1,0 +1,35 @@
+#peck {
+	width: 620px;
+	margin: 0 auto;
+}
+
+/* Infobar is split into chicken-info and farm-info */
+#chicken-info {
+	float: left;
+	width: 428px;
+	padding: 5px;
+	border: 1px solid;
+}
+
+#farm-info {
+	float: right;
+	width: 168px;
+	padding: 5px;
+	border: 1px solid;
+}
+
+/* chicken-info is split into names, actions, status */
+#chicken-names {
+	float: left;
+	width: 140px;
+}
+
+#chicken-actions {
+	float: left;
+	width: 140px;
+}
+
+#chicken-status {
+	float: right;
+	width: 148;
+}

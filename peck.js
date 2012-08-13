@@ -296,6 +296,8 @@ PECK.game_loop = function (counter) {
 PECK.setup = function () {	
 
 	var canvas = document.getElementById("canvas");
+	PECK.yard.width = canvas.width;
+	PECK.yard.height = canvas.height;
 	PECK.GFX.set_ctx (canvas.getContext("2d"));
 
     canvas.addEventListener("click", PECK.dropGrainOnClick, false);
