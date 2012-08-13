@@ -40,8 +40,8 @@ PECK.yard.draw = function () {
 	PECK.GFX.ctx.fillStyle = PECK.GFX.colouring ("ground");
     PECK.GFX.ctx.fillRect(0, 0, this.width, this.height);
 
-	this.chickens.forEach (function (c) { PECK.GFX.select_chicken_frame (c); });
 	this.grains.forEach (function (g) { PECK.GFX.draw_grain (g); });
+	this.chickens.forEach (function (c) { PECK.GFX.select_chicken_frame (c); });
 	
 	PECK.infobar.draw (this.chickens);
 	
@@ -61,17 +61,24 @@ PECK.infobar.x_columns = [15, 100, 200, 360];
 PECK.infobar.draw = function (chickens) {
 	names_html = "";
 	actions_html = "";
+	status_html = "";
 	
 	chickens.forEach (function (c) {
 		names_html += ("<li>" + c.name + "</li>");
 		actions_html += ("<li>" + c.behaviour.move + "</li>");
+		status_html += PECK.infobar.draw_status (c);
 	});
 	
 	document.getElementById("chicken-names-list").innerHTML = names_html;
 	document.getElementById("chicken-actions-list").innerHTML = actions_html;
+	document.getElementById("chicken-status-list").innerHTML = status_html;
 	
 	farm_html = "<p>Day: " + this.day + "</p><p>Time: " + this.hour + ":00</p>";
 	document.getElementById("farm-info-text").innerHTML = farm_html;
+};
+
+PECK.infobar.draw_status = function (chicken) {
+	return "<li>" + chicken.satiation + "/100</li>";
 };
 
 

@@ -117,6 +117,7 @@ PECK.chicken_creator = function (n) {
 		frame: 0,
 		chasing: false,
 		time_to_update: 0,
+		satiation: 100,
 		
 		behaviour: {
 			moves: ["standing", "bok", "peck", "walk", "scratch", "chase"],
@@ -165,6 +166,7 @@ PECK.chicken_creator = function (n) {
 			this.chasing = false;
 			if (caught)
 			{
+				this.satiation = Math.min (100, this.satiation+10);
 				this.behaviour.move = "peck";
 			}
 			else if (this.behaviour.move === "chase")
@@ -243,6 +245,8 @@ PECK.chicken_creator = function (n) {
 				this.update_heading ();
 				this.update_position ();
 				this.frame ? this.frame = 0 : this.frame = 1;
+				
+				this.satiation = Math.max (0, this.satiation-1);
 			
 				// reset update counter
 				this.time_to_update = 50 + PECK.rand(50);
