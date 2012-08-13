@@ -37,3 +37,8 @@
 	float: right;
 	width: 120px;
 }
+
+.bar {
+	width: 60px;
+	height: 12px;
+}

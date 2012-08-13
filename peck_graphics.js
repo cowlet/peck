@@ -66,19 +66,45 @@ PECK.infobar.draw = function (chickens) {
 	chickens.forEach (function (c) {
 		names_html += ("<li>" + c.name + "</li>");
 		actions_html += ("<li>" + c.behaviour.move + "</li>");
-		status_html += PECK.infobar.draw_status (c);
+		status_html += ("<li><canvas class=\"bar\" id=\"" + c.name +
+		                "\"></canvas></li>");
 	});
 	
 	document.getElementById("chicken-names-list").innerHTML = names_html;
 	document.getElementById("chicken-actions-list").innerHTML = actions_html;
 	document.getElementById("chicken-status-list").innerHTML = status_html;
 	
+	chickens.forEach (function (c) { PECK.infobar.draw_status (c) });
+	
 	farm_html = "<p>Day: " + this.day + "</p><p>Time: " + this.hour + ":00</p>";
 	document.getElementById("farm-info-text").innerHTML = farm_html;
 };
 
 PECK.infobar.draw_status = function (chicken) {
-	return "<li>" + chicken.satiation + "/100</li>";
+	var canvas = document.getElementById (chicken.name);
+	var ctx = canvas.getContext("2d");
+	ctx.fillStyle = "black";
+	ctx.fillRect (0, 0, canvas.width, canvas.height);
+	var xmarg = 5;
+	var ymarg = 10;
+	
+	var graph_length = (canvas.width - 2*xmarg) * chicken.satiation/100;
+	if (chicken.satiation > 60)
+	{
+	    ctx.fillStyle = "green";
+	}
+	else if (chicken.satiation > 25)
+	{
+		ctx.fillStyle = "yellow";
+	}
+	else
+	{
+		ctx.fillStyle = "red";
+	}
+	ctx.fillRect (xmarg, ymarg, graph_length, canvas.height-2*ymarg);
+	ctx.fillStyle = "white";
+	ctx.fillRect ((xmarg+graph_length), ymarg,
+	              (canvas.width - graph_length - 2*xmarg), canvas.height-2*ymarg);
 };
 
 
