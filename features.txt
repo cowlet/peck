@@ -1,11 +1,11 @@
-- Chickens have happiness counters
++ Chickens have happiness counters
 - Change pointer between grain or ruffle
 - Ruffle increases happiness
 - Happiness decreases over time
 
-- Chickens have satiation/hunger counter
-- Eating grain increases satiation
-- Satiation decreases over time
++ Chickens have satiation/hunger counter
++ Eating grain increases satiation
++ Satiation decreases over time
 
 + Have a day/night cycle
 + Change colours/drawing for day/night

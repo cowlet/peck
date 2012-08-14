@@ -25,17 +25,28 @@
 /* chicken-info is split into names, actions, status */
 #chicken-names {
 	float: left;
-	width: 140px;
+	width: 100px;
 }
 
 #chicken-actions {
 	float: left;
-	width: 140px;
+	width: 100px;
 }
 
-#chicken-status {
+#chicken-satiation {
 	float: right;
-	width: 120px;
+	width: 100px;
+}
+
+#chicken-happiness {
+  float: right;
+  width: 128px;
+}
+
+ul {
+  list-style-type: none;
+  padding: 0px;
+  margin: 0px;
 }
 
 .bar {

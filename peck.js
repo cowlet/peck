@@ -118,6 +118,7 @@ PECK.chicken_creator = function (n) {
 		chasing: false,
 		time_to_update: 0,
 		satiation: 100,
+    happiness: 100,
 		
 		behaviour: {
 			moves: ["standing", "bok", "peck", "walk", "scratch", "chase"],
