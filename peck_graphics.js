@@ -7,7 +7,7 @@ PECK.GFX.colourways = {
     beaksnfeet: "orange",
     grain: "brown",
     text: "black",
-    egg: "black"
+    egg: "white"
   },
   night: {
     ground: "rgb(50,50,100)",
@@ -15,7 +15,7 @@ PECK.GFX.colourways = {
     beaksnfeet: "rgb(165,150,150)",
     grain: "black",
     text: "white",
-    egg: "black"
+    egg: "rgb(240,240,220)"
   },
   between: {
     ground: "rgb(242,159,153)",
@@ -23,7 +23,7 @@ PECK.GFX.colourways = {
     beaksnfeet: "rgb(220,120,90)",
     grain: "brown",
     text: "white",
-    egg: "black"
+    egg: "rgb(240, 240, 220)"
   },
 };
 
@@ -323,10 +323,22 @@ PECK.GFX.draw_grain = function (g) {
 
 /*** Egg drawing ***/
 PECK.GFX.draw_egg = function (e) {
-  PECK.GFX.ctx.fillStyle = PECK.GFX.colouring ("egg");
+  PECK.GFX.ctx.fillStyle = "rgb(100, 100, 60)";
   PECK.GFX.ctx.beginPath();
-  PECK.GFX.ctx.arc (e.x, e.y, 10, 0, Math.PI*2, true);
+  PECK.GFX.ctx.arc (e.x, e.y, 10, Math.PI/6, Math.PI*5/6, false);
   PECK.GFX.ctx.closePath();
   PECK.GFX.ctx.fill();
+
+  PECK.GFX.ctx.fillStyle = PECK.GFX.colouring ("egg");
+  PECK.GFX.ctx.beginPath();
+  PECK.GFX.ctx.arc (e.x, e.y, 9, 0, Math.PI*2, false);
+  PECK.GFX.ctx.closePath();
+  PECK.GFX.ctx.fill();
+
+  PECK.GFX.ctx.beginPath();
+  PECK.GFX.ctx.arc (e.x, e.y-3, 8, 0, Math.PI*2, true);
+  PECK.GFX.ctx.closePath();
+  PECK.GFX.ctx.fill();
+
 };
 
