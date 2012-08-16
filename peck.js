@@ -104,17 +104,23 @@ PECK.infobar = {
 }
 
 
-PECK.egg_creator = function (n) {
+PECK.egg_creator = function (n, startx, starty) {
   return {
     name: n,
-    x: PECK.rand (PECK.yard.width),
-    y: PECK.rand (PECK.yard.height),
+    x: startx, 
+    y: starty, 
     satiation: 100,
     happiness: 100,
     behaviour: { move: "egg" },
     time_to_update: 0,
     birthday: PECK.infobar.day,
     birthhour: PECK.infobar.hour,
+
+    // An egg isn't interested in grain!
+    start_chase: function () {
+    },
+    stop_chase: function () {
+    },
 
     hours_since_birth: function () {
       return ((PECK.infobar.day - this.birthday) * 24 +
@@ -148,6 +154,7 @@ PECK.egg_creator = function (n) {
       this.heading = PECK.rand (360);
       this.frame = 0;
       this.chasing = false;
+      this.last_lay_day = PECK.infobar.day; // don't lay first day
       
       // Swap to the more complex chicken behaviour
       this.behaviour = {
@@ -265,10 +272,21 @@ PECK.egg_creator = function (n) {
         }
       };
 
+      this.chance_of_laying = function () {
+        if ((this.last_lay_day < PECK.infobar.day) &&
+            (PECK.infobar.hour === 6))
+        {
+          PECK.yard.add_chicken (PECK.egg_creator (this.name + PECK.rand(50),
+                                                   this.x, this.y+this.height));
+          this.last_lay_day = PECK.infobar.day;
+        }
+      };
+
       // Finally, rewrite the update tasks for chicken behaviour
       this.update_tasks = function () {
         //console.log ("Chicken is updating");
         this.behaviour.next_move ();
+        this.chance_of_laying ();
         PECK.yard.is_grain_around (this);
         this.update_heading ();
         this.update_position ();
@@ -335,14 +353,18 @@ PECK.setup = function () {
     PECK.yard.set_mouse(PECK.getCursorPosition(e));
   }, false);
   
-  ["Henrietta", "Henelope", "Henderson", "Hencules", "Hendrick"].forEach (function (n) {
-    PECK.yard.add_chicken (PECK.egg_creator (n));
+/*  ["Henrietta", "Henelope", "Henderson", "Hencules", "Hendrick"].forEach (function (n) {
+    PECK.yard.add_chicken (PECK.egg_creator (n,
+                                             PECK.rand (PECK.yard.width), 
+                                             PECK.rand (PECK.yard.height)));
   });
-  
-/*  ["Henrietta"].forEach (function (n) {
-    PECK.yard.add_chicken (PECK.egg_creator (n));
+*/  
+  ["Henrietta"].forEach (function (n) {
+    PECK.yard.add_chicken (PECK.egg_creator (n,
+                                             PECK.rand (PECK.yard.width), 
+                                             PECK.rand (PECK.yard.height)));
   });
-*/
+
   PECK.game_loop (0);
 };  
 
