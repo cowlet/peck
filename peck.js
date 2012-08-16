@@ -12,6 +12,20 @@ PECK.yard = {
   set_mouse: function (ms) {
     this.mouse_state = ms;
   },
+
+  unique_name: function (n) {
+    // If we get a collision, increase the range of name search
+    for (var i = 10; ; i+= 10)
+    {
+      var potential = n + "-" + PECK.rand(i);
+      //console.log("Potential name is " + potential);
+      if (this.chickens.every (function (c) { return (c.name !== potential) }))
+      {
+        //console.log ("Returning " + potential);
+        return potential;
+      }
+    }
+  },
   
   add_chicken: function (c) {
     this.chickens.push (c);
@@ -276,7 +290,7 @@ PECK.egg_creator = function (n, startx, starty) {
         if ((this.last_lay_day < PECK.infobar.day) &&
             (PECK.infobar.hour === 6))
         {
-          PECK.yard.add_chicken (PECK.egg_creator (this.name + PECK.rand(50),
+          PECK.yard.add_chicken (PECK.egg_creator (PECK.yard.unique_name (this.name),
                                                    this.x, this.y+this.height));
           this.last_lay_day = PECK.infobar.day;
         }
