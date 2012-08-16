@@ -112,6 +112,7 @@ PECK.egg_creator = function (n) {
     satiation: 100,
     happiness: 100,
     behaviour: { move: "egg" },
+    time_to_update: 0,
     birthday: PECK.infobar.day,
     birthhour: PECK.infobar.hour,
 
@@ -120,159 +121,152 @@ PECK.egg_creator = function (n) {
               (PECK.infobar.hour - this.birthhour));
     },
 
-    update: function () {
+    update_tasks: function () {
+      // All an egg has to do is check if it's time to hatch
       //console.log ("Age is " + this.hours_since_birth () + "hours");
-      if (this.hours_since_birth () >= 6)
+      if (this.hours_since_birth () >= 3)
       {
-        console.log ("Hatching...");
-        /* hatch */
-        var chick = PECK.chicken_creator (this.name);
-        chick.x = this.x;
-        chick.y = this.y;
-
-        /* Replace egg with chick in yard */
-        var i = PECK.yard.chickens.indexOf (this);
-        PECK.yard.chickens[i] = chick;
+        //console.log ("Hatching...");
+        this.hatch ();
       }
-    }
-  };
-};
+    },
 
+    update: function () {
+      this.time_to_update -= 1;
+      if (this.time_to_update > 0)
+      {
+        return;
+      }
 
-// *** Chicken-related items ***
-PECK.chicken_creator = function (n) {
-  return {
-    name: n,
-    x: PECK.rand (PECK.yard.width),
-    y: PECK.rand (PECK.yard.height),
-    height: 20,
-    heading: PECK.rand (360),
-    frame: 0,
-    chasing: false,
-    time_to_update: 0,
-    satiation: 100,
-    happiness: 100,
+      this.update_tasks ();
+      this.time_to_update = 50 + PECK.rand(50);
+    },
+
+    hatch: function () {
+      // Add all the chicken data
+      this.height = 20;
+      this.heading = PECK.rand (360);
+      this.frame = 0;
+      this.chasing = false;
+      
+      // Swap to the more complex chicken behaviour
+      this.behaviour = {
+        moves: ["standing", "bok", "peck", "walk", "scratch", "chase"],
+        transitions: {
+          "standing": [10, 20, 10, 40, 20,   0],
+          "bok":      [50, 50,  0,  0,  0,   0],
+          "peck":     [20,  0, 50,  0, 30,   0],
+          "walk":     [30,  0,  0, 70,  0,   0],
+          "scratch":  [20,  0, 20,  0, 60,   0],
+          "chase":    [ 0,  0,  0,  0,  0, 100]
+        },
+        move: "standing",
+
+        next_move: function () {
+          var p = PECK.rand(100);
+          var that = this;
+          // For the correct row of transitions, sum elements one by
+          // one until we find the partial_sum greater or equal to p    
+          this.transitions[this.move].some (function (value, i) {
+            this.partial_sum += value;
+            if (p <= this.partial_sum)
+            {
+              //console.log ("Move for p = " + p + " should be to " + that.moves[i]);
+              that.move = that.moves[i];
+              return true;
+            }
+            return false;
+          }, {partial_sum: 0});
+        }
+      };
     
-    behaviour: {
-      moves: ["standing", "bok", "peck", "walk", "scratch", "chase"],
-      transitions: {
-        "standing": [10, 20, 10, 40, 20,   0],
-        "bok":      [50, 50,  0,  0,  0,   0],
-        "peck":     [20,  0, 50,  0, 30,   0],
-        "walk":     [30,  0,  0, 70,  0,   0],
-        "scratch":  [20,  0, 20,  0, 60,   0],
-        "chase":    [ 0,  0,  0,  0,  0, 100]
-      },
-      move: "standing",
+      // Now add all the chicken functions
+      this.direction = function () {
+        return (this.heading < 180 ? "east" : "west");
+      };
+    
+      this.rad_heading = function () {
+        return this.heading * Math.PI / 180;
+      };
+      
+      this.start_chase = function (pos) {
+        this.chasing = pos;
+        this.behaviour.move = "chase";
+      };
+      
+      this.stop_chase = function (caught) {
+        this.chasing = false;
+        if (caught)
+        {
+          this.satiation = Math.min (100, this.satiation+10);
+          this.behaviour.move = "peck";
+        }
+        else if (this.behaviour.move === "chase")
+        {
+          this.behaviour.move = "standing";
+        };
+        // else, it wasn't chasing, so keep moving as before
+      };  
 
-      next_move: function () {
-        var p = PECK.rand(100);
-        var that = this;
-        // For the correct row of transitions, sum elements one by
-        // one until we find the partial_sum greater or equal to p    
-        this.transitions[this.move].some (function (value, i) {
-          this.partial_sum += value;
-          if (p <= this.partial_sum)
+      this.can_see = function (grain) {
+        if (this.direction() === "west" && (grain.x < this.x) ||
+            this.direction() === "east" && (grain.x > this.x))
+        {
+          if (PECK.approx_equals (this.x, grain.x, 25) &&
+              PECK.approx_equals (this.y+this.height, grain.y, 25))
           {
-            //console.log ("Move for p = " + p + " should be to " + that.moves[i]);
-            that.move = that.moves[i];
+            //console.log (this.name + " can see grain");
             return true;
           }
-          return false;
-        }, {partial_sum: 0});
-      }
-    },
-  
-    direction: function () {
-      return (this.heading < 180 ? "east" : "west");
-    },
-  
-    rad_heading: function () {
-      return this.heading * Math.PI / 180;
-    },
-    
-    start_chase: function (pos) {
-      this.chasing = pos;
-      this.behaviour.move = "chase";
-    },
-    
-    stop_chase: function (caught) {
-      this.chasing = false;
-      if (caught)
-      {
-        this.satiation = Math.min (100, this.satiation+10);
-        this.behaviour.move = "peck";
-      }
-      else if (this.behaviour.move === "chase")
-      {
-        this.behaviour.move = "standing";
+        }
+        return false;
       };
-      // else, it wasn't chasing, so keep moving as before
-    },  
-
-    can_see: function (grain) {
-      if (this.direction() === "west" && (grain.x < this.x) ||
-          this.direction() === "east" && (grain.x > this.x))
-      {
-        if (PECK.approx_equals (this.x, grain.x, 25) &&
-            PECK.approx_equals (this.y+this.height, grain.y, 25))
+    
+      this.standing_near = function (grain) {
+        if (PECK.approx_equals (this.x, grain.x, 5) &&
+            PECK.approx_equals (this.y+this.height, grain.y, 5))
         {
-          //console.log (this.name + " can see grain");
+          //console.log (this.name + " is near grain");
           return true;
         }
-      }
-      return false;
-    },
-  
-    standing_near: function (grain) {
-      if (PECK.approx_equals (this.x, grain.x, 5) &&
-          PECK.approx_equals (this.y+this.height, grain.y, 5))
-      {
-        //console.log (this.name + " is near grain");
-        return true;
-      }
-      return false;
-    },
-    
-    update_heading: function () {          
-      if (this.chasing)
-      {
-        // at x,y going to chasing.x,chasing.y
-        var h = PECK.rand(90);
-        // generate a new heading into the quadrant of the chase
-        if (this.chasing.x > this.x && this.chasing.y < this.y)
-          this.heading = h;
-        else if (this.chasing.x > this.x && this.chasing.y > this.y)
-          this.heading = 90+h;
-        else if (this.chasing.x < this.x && this.chasing.y > this.y)
-          this.heading = 180+h;
+        return false;
+      };
+      
+      this.update_heading = function () {          
+        if (this.chasing)
+        {
+          // at x,y going to chasing.x,chasing.y
+          var h = PECK.rand(90);
+          // generate a new heading into the quadrant of the chase
+          if (this.chasing.x > this.x && this.chasing.y < this.y)
+            this.heading = h;
+          else if (this.chasing.x > this.x && this.chasing.y > this.y)
+            this.heading = 90+h;
+          else if (this.chasing.x < this.x && this.chasing.y > this.y)
+            this.heading = 180+h;
+          else
+            this.heading = 270+h;
+        }
         else
-          this.heading = 270+h;
-      }
-      else
-      {
-        // If we're not chasing, 1 in 5 times change direction
-        if (!PECK.rand(5)) 
-          this.heading = PECK.rand (360);
-      }
-    },
-  
-    update_position: function () {    
-      if (this.behaviour.move === "walk" ||
-          this.behaviour.move === "chase")
-      {
-        // chickens move 10 pix
-        this.x += 10 * Math.sin(this.rad_heading());
-        this.y -= 10 * Math.cos(this.rad_heading());
-      }
-    },
-  
-    update: function () {
-      // decrement hysteresis counter before deciding to update
-      this.time_to_update -= 1;
+        {
+          // If we're not chasing, 1 in 5 times change direction
+          if (!PECK.rand(5)) 
+            this.heading = PECK.rand (360);
+        }
+      };
     
-      if (this.time_to_update <= 0)
-      {
+      this.update_position = function () {    
+        if (this.behaviour.move === "walk" ||
+            this.behaviour.move === "chase")
+        {
+          // chickens move 10 pix
+          this.x += 10 * Math.sin(this.rad_heading());
+          this.y -= 10 * Math.cos(this.rad_heading());
+        }
+      };
+
+      // Finally, rewrite the update tasks for chicken behaviour
+      this.update_tasks = function () {
         //console.log ("Chicken is updating");
         this.behaviour.next_move ();
         PECK.yard.is_grain_around (this);
@@ -281,14 +275,12 @@ PECK.chicken_creator = function (n) {
         this.frame ? this.frame = 0 : this.frame = 1;
         
         this.satiation = Math.max (0, this.satiation-1);
-      
-        // reset update counter
-        this.time_to_update = 50 + PECK.rand(50);
-      }
+      };
+ 
     }
-  
   };
 };
+
 
 
 PECK.dropGrainOnClick = function (e) {
@@ -343,14 +335,14 @@ PECK.setup = function () {
     PECK.yard.set_mouse(PECK.getCursorPosition(e));
   }, false);
   
-/*  ["Henrietta", "Henelope", "Henderson", "Hencules", "Hendrick"].forEach (function (n) {
-    PECK.yard.add_chicken (PECK.chicken_creator (n));
-  });
-*/  
-  ["Henrietta"].forEach (function (n) {
+  ["Henrietta", "Henelope", "Henderson", "Hencules", "Hendrick"].forEach (function (n) {
     PECK.yard.add_chicken (PECK.egg_creator (n));
   });
-
+  
+/*  ["Henrietta"].forEach (function (n) {
+    PECK.yard.add_chicken (PECK.egg_creator (n));
+  });
+*/
   PECK.game_loop (0);
 };  
 
