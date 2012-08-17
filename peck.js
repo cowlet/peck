@@ -322,25 +322,6 @@ PECK.egg_creator = function (n, startx, starty) {
 
 
 
-PECK.dropGrainOnClick = function (e) {
-  var position = PECK.getCursorPosition(e);
-  if (position === undefined) {
-    return;
-  }
-
-  // Drop n grains in an nxn square centered on position's x and y
-  var n = 10;
-  for (var i = 0; i < n; i += 1)
-  {
-    PECK.yard.add_grain ( {
-      x: position.x - n/2 + PECK.rand (n), // centered on click
-      y: position.y - n/2 + PECK.rand (n), // centered on click
-    });
-  }
-  PECK.yard.draw();
-};
-
-
 // *** Game loop ***
 // game_loop prints and updates the full yard of chickens
 PECK.game_loop = function (counter) {
@@ -369,7 +350,7 @@ PECK.setup = function () {
   PECK.yard.height = canvas.height;
   PECK.GFX.set_ctx (canvas.getContext("2d"));
 
-  canvas.addEventListener("click", PECK.dropGrainOnClick, false);
+  canvas.addEventListener("click", PECK.GFX.handleClick, false);
   canvas.addEventListener("mousemove", function (e) {
     PECK.yard.set_mouse(PECK.getCursorPosition(e));
   }, false);

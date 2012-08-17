@@ -15,3 +15,8 @@
 
 + Egg schedule dependent on happiness
 
+- Have a money counter
+- Sell eggs and chickens
+- Buy grain
+
+

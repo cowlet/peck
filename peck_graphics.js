@@ -342,3 +342,36 @@ PECK.GFX.draw_egg = function (e) {
 
 };
 
+/*** Mouse events ***/
+PECK.GFX.handleClick = function (e) {
+  var position = PECK.getCursorPosition(e);
+  if (position === undefined) {
+    return;
+  }
+
+  if (document.getElementById ("Grain").checked)
+  {
+    PECK.GFX.dropGrainOnClick (position);
+  }
+  else if (document.getElementById ("Sell").checked)
+  {
+    PECK.GFX.sellItem ();
+  }
+};
+
+
+PECK.GFX.dropGrainOnClick = function (position) {
+  // Drop n grains in an nxn square centered on position's x and y
+  var n = 10;
+  for (var i = 0; i < n; i += 1)
+  {
+    PECK.yard.add_grain ( {
+      x: position.x - n/2 + PECK.rand (n), // centered on click
+      y: position.y - n/2 + PECK.rand (n), // centered on click
+    });
+  }
+  PECK.yard.draw();
+};
+
+
+
