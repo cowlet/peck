@@ -288,13 +288,19 @@ PECK.egg_creator = function (n, startx, starty) {
 
       this.chance_of_laying = function () {
         if ((this.last_lay_day < PECK.infobar.day) &&
-            (PECK.infobar.hour === 6))
+            (PECK.infobar.hour === 6) &&
+            (PECK.rand (this.happiness) > 10))
         {
           PECK.yard.add_chicken (PECK.egg_creator (PECK.yard.unique_name (this.name),
                                                    this.x, this.y+this.height));
           this.last_lay_day = PECK.infobar.day;
         }
       };
+
+      this.update_happiness = function () {
+        var addition = (this.satiation - 50) / 5;
+        this.happiness = Math.max (0, Math.min (100, this.happiness+addition));
+      }
 
       // Finally, rewrite the update tasks for chicken behaviour
       this.update_tasks = function () {
@@ -307,6 +313,7 @@ PECK.egg_creator = function (n, startx, starty) {
         this.frame ? this.frame = 0 : this.frame = 1;
         
         this.satiation = Math.max (0, this.satiation-1);
+        this.update_happiness ();
       };
  
     }

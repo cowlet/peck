@@ -1,7 +1,7 @@
 + Chickens have happiness counters
 - Change pointer between grain or ruffle
 - Ruffle increases happiness
-- Happiness decreases over time
++ Happiness decreases over time
 
 + Chickens have satiation/hunger counter
 + Eating grain increases satiation
@@ -11,7 +11,7 @@
 + Change colours/drawing for day/night
 
 - Can require certain amount of food over day/night
-- Can lay eggs
++ Can lay eggs
 
-- Egg schedule dependent on happiness
++ Egg schedule dependent on happiness
 
