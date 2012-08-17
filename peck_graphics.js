@@ -86,7 +86,8 @@ PECK.infobar.draw = function (chickens) {
     PECK.infobar.draw_bar (c.name + "-hap", c.happiness);
   });
   
-  farm_html = "<p>Day: " + this.day + "</p><p>Time: " + this.hour + ":00</p>";
+  farm_html = "<p>Day: " + this.day + " Time: " + this.hour + ":00</p><p>Money: $" +
+              this.money + "</p>";
   document.getElementById("farm-info-text").innerHTML = farm_html;
 };
 
@@ -120,6 +121,8 @@ PECK.infobar.draw_bar = function (element_name, value) {
 
 /*** Chicken drawing functions ***/
 PECK.GFX.select_chicken_frame = function (c) {
+  //PECK.GFX.draw_hitbox (c);
+
   if (c.frame === undefined) // egg
   {
     PECK.GFX.draw_egg (c);
@@ -349,13 +352,13 @@ PECK.GFX.handleClick = function (e) {
     return;
   }
 
-  if (document.getElementById ("Grain").checked)
+  if (document.getElementById ("grain").checked)
   {
     PECK.GFX.dropGrainOnClick (position);
   }
-  else if (document.getElementById ("Sell").checked)
+  else if (document.getElementById ("sell").checked)
   {
-    PECK.GFX.sellItem ();
+    PECK.GFX.sellItem (position);
   }
 };
 
@@ -370,7 +373,44 @@ PECK.GFX.dropGrainOnClick = function (position) {
       y: position.y - n/2 + PECK.rand (n), // centered on click
     });
   }
+  // Pay for the grain
+  PECK.infobar.money -= 1;
   PECK.yard.draw();
+};
+
+PECK.GFX.draw_hitbox = function (chicken) {
+  PECK.GFX.ctx.fillStyle = "black";
+  if (chicken.behaviour.move === "egg")
+  {
+    PECK.GFX.ctx.strokeRect (chicken.x-10, chicken.y-12, 20, 24);
+  }
+  else
+  {
+    PECK.GFX.ctx.strokeRect (chicken.x-10, chicken.y, 20, 20);
+  }
+};
+
+PECK.GFX.sellItem  = function (position) {
+  // Is the click on something sellable?
+  var clicked = PECK.yard.chickens.filter (function (c) {
+    if ((c.behaviour.move === "egg") &&
+        PECK.approx_equals (c.x, position.x, 10) &&
+        PECK.approx_equals (c.y, position.y, 12))
+    {
+      return true;
+    }
+    else if (PECK.approx_equals (c.x, position.x, 10) &&
+             PECK.approx_equals (c.y+10, position.y, 10))
+    {
+      return true;
+    }
+  });
+
+  if (clicked.length > 0)
+  {
+    PECK.infobar.money += 5;
+    PECK.yard.chickens.splice (PECK.yard.chickens.indexOf (clicked[0]), 1);
+  }
 };
 
 

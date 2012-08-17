@@ -91,6 +91,7 @@ PECK.yard = {
 PECK.infobar = {  
   day: 0,
   hour: 6,
+  money: 10,
   
   increment_time: function () {
     this.hour += 1;
@@ -123,6 +124,7 @@ PECK.egg_creator = function (n, startx, starty) {
     name: n,
     x: startx, 
     y: starty, 
+    height: 20,
     satiation: 100,
     happiness: 100,
     behaviour: { move: "egg" },
@@ -361,7 +363,7 @@ PECK.setup = function () {
                                              PECK.rand (PECK.yard.height)));
   });
 */  
-  ["Henrietta"].forEach (function (n) {
+  ["Henrietta", "Henelope"].forEach (function (n) {
     PECK.yard.add_chicken (PECK.egg_creator (n,
                                              PECK.rand (PECK.yard.width), 
                                              PECK.rand (PECK.yard.height)));

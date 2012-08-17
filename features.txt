@@ -15,8 +15,10 @@
 
 + Egg schedule dependent on happiness
 
-- Have a money counter
-- Sell eggs and chickens
-- Buy grain
++ Have a money counter
++ Sell eggs and chickens
++ Buy grain
 
+- Threshold on money (can't go negative)
+- End states (no chickens, no money)
 

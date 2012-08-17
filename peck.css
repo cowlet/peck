@@ -53,3 +53,13 @@ ul {
 	width: 60px;
 	height: 12px;
 }
+
+#grain-label {
+  background-color: white;
+  color: red;
+}
+
+#sell-label {
+  background-color: white;
+  color: green;
+}
