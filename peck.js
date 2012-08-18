@@ -162,7 +162,7 @@ PECK.egg_creator = function (n, startx, starty) {
       }
 
       this.update_tasks ();
-      this.time_to_update = 50 + PECK.rand(50);
+      this.time_to_update = PECK.timeout()/10 + PECK.rand( PECK.timeout()/10 );
     },
 
     hatch: function () {
@@ -364,6 +364,20 @@ PECK.ending = function () {
   return null;
 };
 
+PECK.timeout = function () {
+  if (document.getElementById ("fast").checked)
+  {
+    return 30;
+  }
+  else if (document.getElementById ("medium").checked)
+  {
+    return 150;
+  }
+  
+  return 300; // default is slow
+};
+
+
 // *** Game loop ***
 // game_loop prints and updates the full yard of chickens
 PECK.game_loop = function (counter) {
@@ -373,7 +387,7 @@ PECK.game_loop = function (counter) {
   
   // handle time updates
   counter += 1;
-  if (counter > 300)
+  if (counter > PECK.timeout ())
   {
     PECK.infobar.increment_time();
     counter = 0;
@@ -404,13 +418,7 @@ PECK.setup = function () {
     PECK.yard.set_mouse(PECK.getCursorPosition(e));
   }, false);
   
-/*  ["Henrietta", "Henelope", "Henderson", "Hencules", "Hendrick"].forEach (function (n) {
-    PECK.yard.add_chicken (PECK.egg_creator (n,
-                                             PECK.rand (PECK.yard.width), 
-                                             PECK.rand (PECK.yard.height)));
-  });
-*/  
-  ["Henrietta", "Henelope"].forEach (function (n) {
+  ["Henrietta", "Henelope", "Henderson"].forEach (function (n) {
     PECK.yard.add_chicken (PECK.egg_creator (n,
                                              PECK.rand (PECK.yard.width), 
                                              PECK.rand (PECK.yard.height)));

@@ -8,7 +8,7 @@
 #chicken-info {
 	float: left;
 	width: 428px;
-	height: 160px;
+	height: 170px;
 	padding: 5px;
 	border: 1px solid;
 	overflow: auto;
@@ -17,20 +17,20 @@
 #farm-info {
 	float: right;
 	width: 168px;
-	height: 160px;
+	height: 170px;
 	padding: 5px;
 	border: 1px solid;
 }
 
-/* chicken-info is split into names, actions, status */
+/* chicken-info is split into names, actions, happiness, satiation */
 #chicken-names {
 	float: left;
-	width: 100px;
+	width: 120px;
 }
 
 #chicken-actions {
 	float: left;
-	width: 100px;
+	width: 80px;
 }
 
 #chicken-satiation {
@@ -41,6 +41,16 @@
 #chicken-happiness {
   float: right;
   width: 128px;
+}
+
+/* farm-info contains mouse and time */
+#mouse {
+  float: left;
+  width: 84px;
+}
+
+#time {
+  float: right;
 }
 
 ul {

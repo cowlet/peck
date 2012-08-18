@@ -1,25 +1,9 @@
-+ Chickens have happiness counters
-- Change pointer between grain or ruffle
-- Ruffle increases happiness
-+ Happiness decreases over time
+Possible:
+- Should eggs and chickens sell for different amounts of money?
+- Should happiness be increasable by other means (ruffles)?
+- Should levels of money trigger rewards?
+- Can you buy and place fences?
 
-+ Chickens have satiation/hunger counter
-+ Eating grain increases satiation
-+ Satiation decreases over time
-
-+ Have a day/night cycle
-+ Change colours/drawing for day/night
-
-- Can require certain amount of food over day/night
-+ Can lay eggs
-
-+ Egg schedule dependent on happiness
-
-+ Have a money counter
-+ Sell eggs and chickens
-+ Buy grain
-
-+ Threshold on money (can't go negative)
-+ End states (no chickens, no money)
-
-+ Chickens have to die if too hungry :(
+Definite:
++ Adjust time to speed up or slow down
+- Sell eggs and chickens from the list
