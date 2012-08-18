@@ -12,6 +12,7 @@
 	padding: 5px;
 	border: 1px solid;
 	overflow: auto;
+  text-align: center;
 }
 
 #farm-info {
@@ -22,10 +23,11 @@
 	border: 1px solid;
 }
 
-/* chicken-info is split into names, actions, happiness, satiation */
+/* chicken-info is split into names, actions, happiness, satiation, sell */
 #chicken-names {
 	float: left;
 	width: 120px;
+  text-align: left;
 }
 
 #chicken-actions {
@@ -34,13 +36,18 @@
 }
 
 #chicken-satiation {
-	float: right;
+	float: left;
 	width: 100px;
 }
 
 #chicken-happiness {
+  float: left;
+  width: 100px;
+}
+
+#chicken-sell {
   float: right;
-  width: 128px;
+  width: 28px;
 }
 
 /* farm-info contains mouse and time */
@@ -64,12 +71,12 @@ ul {
 	height: 12px;
 }
 
-#grain-label {
+.buy-text {
   background-color: white;
   color: red;
 }
 
-#sell-label {
+.sell-text {
   background-color: white;
   color: green;
 }

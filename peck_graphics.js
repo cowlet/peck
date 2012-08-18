@@ -69,20 +69,23 @@ PECK.infobar.draw = function (chickens) {
   actions_html = "";
   sat_html = "";
   hap_html = "";
+  price_html = "";
   
   chickens.forEach (function (c) {
     names_html += ("<li>" + c.name + "</li>");
-    actions_html += ("<li>" + (c.behaviour.move || "egg") + "</li>");
+    actions_html += ("<li>" + c.behaviour.move + "</li>");
     sat_html += ("<li><canvas class=\"bar\" id=\"" + c.name +
                  "-sat\"></canvas></li>");
     hap_html += ("<li><canvas class=\"bar\" id=\"" + c.name +
                  "-hap\"></canvas></li>");
+    price_html += ("<li class=\"sell-text\">+$" + c.sells_for + "</li>");
   });
   
   document.getElementById("chicken-names-list").innerHTML = names_html;
   document.getElementById("chicken-actions-list").innerHTML = actions_html;
   document.getElementById("chicken-sat-list").innerHTML = sat_html;
   document.getElementById("chicken-hap-list").innerHTML = hap_html;
+  document.getElementById("chicken-price-list").innerHTML = price_html;
   
   chickens.forEach (function (c) {
     PECK.infobar.draw_bar (c.name + "-sat", c.satiation);
@@ -409,7 +412,7 @@ PECK.GFX.draw_hitbox = function (chicken) {
   }
 };
 
-PECK.GFX.sellItem  = function (position) {
+PECK.GFX.sellItem = function (position) {
   // Is the click on something sellable?
   var clicked = PECK.yard.chickens.filter (function (c) {
     if ((c.behaviour.move === "egg") &&
@@ -428,9 +431,16 @@ PECK.GFX.sellItem  = function (position) {
 
   if (clicked.length > 0)
   {
-    PECK.infobar.money += 5;
+    PECK.infobar.money += clicked[0].sells_for;
     PECK.yard.chickens.splice (PECK.yard.chickens.indexOf (clicked[0]), 1);
   }
+};
+
+PECK.GFX.sellDirect = function (name) {
+  console.log("Selling chicken " + name);
+  var chickens = PECK.yard.chickens.filter (function (c) { return (c.name === name); });
+  PECK.infobar.money += chickens[0].sells_for;
+  PECK.yard.chickens.splice (PECK.yard.chickens.indexOf (chickens[0]), 1);
 };
 
 

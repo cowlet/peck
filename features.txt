@@ -1,5 +1,5 @@
 Possible:
-- Should eggs and chickens sell for different amounts of money?
++ Should eggs and chickens sell for different amounts of money?
 - Should happiness be increasable by other means (ruffles)?
 - Should levels of money trigger rewards?
 - Can you buy and place fences?
