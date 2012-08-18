@@ -19,6 +19,7 @@
 + Sell eggs and chickens
 + Buy grain
 
-- Threshold on money (can't go negative)
-- End states (no chickens, no money)
++ Threshold on money (can't go negative)
++ End states (no chickens, no money)
 
+- Chickens have to die if too hungry :(

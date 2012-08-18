@@ -322,12 +322,21 @@ PECK.egg_creator = function (n, startx, starty) {
   };
 };
 
-
+PECK.ending = function () {
+  if (PECK.infobar.money <= 0)
+  {
+    return ("Game over!\nYou ran out of money :(");
+  }
+  else if (PECK.yard.chickens.length === 0)
+  {
+    return ("Game over!\nYou closed down the farm.\nYou made $" + PECK.infobar.money);
+  }
+  return null;
+};
 
 // *** Game loop ***
 // game_loop prints and updates the full yard of chickens
 PECK.game_loop = function (counter) {
-      
   // handle yard updates
   PECK.yard.chickens.forEach (function (c) { c.update (); });
   PECK.yard.draw();
@@ -340,6 +349,14 @@ PECK.game_loop = function (counter) {
     counter = 0;
   }
   
+  // check for end states
+  var end_msg = PECK.ending ();
+  if (end_msg)
+  {
+    alert(end_msg);
+    return;
+  }
+      
   var t = setTimeout(PECK.game_loop, 10, counter);
 };
 
