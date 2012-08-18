@@ -22,4 +22,4 @@
 + Threshold on money (can't go negative)
 + End states (no chickens, no money)
 
-- Chickens have to die if too hungry :(
++ Chickens have to die if too hungry :(

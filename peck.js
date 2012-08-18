@@ -127,6 +127,7 @@ PECK.egg_creator = function (n, startx, starty) {
     height: 20,
     satiation: 100,
     happiness: 100,
+    health: 5,
     behaviour: { move: "egg" },
     time_to_update: 0,
     birthday: PECK.infobar.day,
@@ -302,7 +303,31 @@ PECK.egg_creator = function (n, startx, starty) {
       this.update_happiness = function () {
         var addition = (this.satiation - 50) / 5;
         this.happiness = Math.max (0, Math.min (100, this.happiness+addition));
-      }
+      };
+
+      this.health_check = function () {
+        if (this.satiation === 0)
+        {
+          this.health -= 1;
+        }
+        if (this.happiness === 0)
+        {
+          this.health -= 1;
+        }
+
+        if (this.health <= 0)
+        {
+          /* Farewall, c.name, we hardly knew ye */
+          this.behaviour = { move: "dead" };
+          this.happiness = 0;
+          this.satiation = 0;
+          this.update_tasks = function () { };
+
+          // Prevent zombie chickens from chasing grain
+          this.start_chase = function () { };
+          this.stop_chase = function () { };
+        }
+      };
 
       // Finally, rewrite the update tasks for chicken behaviour
       this.update_tasks = function () {
@@ -316,6 +341,7 @@ PECK.egg_creator = function (n, startx, starty) {
         
         this.satiation = Math.max (0, this.satiation-1);
         this.update_happiness ();
+        this.health_check ();
       };
  
     }
@@ -330,6 +356,10 @@ PECK.ending = function () {
   else if (PECK.yard.chickens.length === 0)
   {
     return ("Game over!\nYou closed down the farm.\nYou made $" + PECK.infobar.money);
+  }
+  else if (PECK.yard.chickens.every (function (c) { return c.behaviour.move === "dead"; }))
+  {
+    return ("Game over!\nAll your chickens died!\nYou meanie!");
   }
   return null;
 };

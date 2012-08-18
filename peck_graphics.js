@@ -7,7 +7,8 @@ PECK.GFX.colourways = {
     beaksnfeet: "orange",
     grain: "brown",
     text: "black",
-    egg: "white"
+    egg: "white",
+    grave: "rgb(100,100,100)",
   },
   night: {
     ground: "rgb(50,50,100)",
@@ -15,7 +16,8 @@ PECK.GFX.colourways = {
     beaksnfeet: "rgb(165,150,150)",
     grain: "black",
     text: "white",
-    egg: "rgb(240,240,220)"
+    egg: "rgb(240,240,220)",
+    grave: "black",
   },
   between: {
     ground: "rgb(242,159,153)",
@@ -23,7 +25,8 @@ PECK.GFX.colourways = {
     beaksnfeet: "rgb(220,120,90)",
     grain: "brown",
     text: "white",
-    egg: "rgb(240, 240, 220)"
+    egg: "rgb(240, 240, 220)",
+    grave: "rgb(80,80,80)",
   },
 };
 
@@ -41,7 +44,7 @@ PECK.yard.draw = function () {
   var i;
   
   PECK.GFX.ctx.fillStyle = PECK.GFX.colouring ("ground");
-    PECK.GFX.ctx.fillRect(0, 0, this.width, this.height);
+  PECK.GFX.ctx.fillRect(0, 0, this.width, this.height);
 
   this.grains.forEach (function (g) { PECK.GFX.draw_grain (g); });
   this.chickens.forEach (function (c) { PECK.GFX.select_chicken_frame (c); });
@@ -123,9 +126,14 @@ PECK.infobar.draw_bar = function (element_name, value) {
 PECK.GFX.select_chicken_frame = function (c) {
   //PECK.GFX.draw_hitbox (c);
 
-  if (c.frame === undefined) // egg
+  if (c.behaviour.move === "egg")
   {
     PECK.GFX.draw_egg (c);
+    return;
+  }
+  if (c.behaviour.move === "dead")
+  {
+    PECK.GFX.draw_grave (c);
     return;
   }
   
@@ -345,6 +353,17 @@ PECK.GFX.draw_egg = function (e) {
 
 };
 
+/*** Grave drawing ***/
+PECK.GFX.draw_grave = function (c) {
+  PECK.GFX.ctx.fillStyle = PECK.GFX.colouring ("grave");
+  PECK.GFX.ctx.beginPath ();
+  PECK.GFX.ctx.arc (c.x, c.y, 10, 0, Math.PI, true);
+  PECK.GFX.ctx.closePath();
+  PECK.GFX.ctx.fill();
+
+  PECK.GFX.ctx.fillRect (c.x-10, c.y-1, 20, 15);
+};
+
 /*** Mouse events ***/
 PECK.GFX.handleClick = function (e) {
   var position = PECK.getCursorPosition(e);
@@ -399,7 +418,8 @@ PECK.GFX.sellItem  = function (position) {
     {
       return true;
     }
-    else if (PECK.approx_equals (c.x, position.x, 10) &&
+    else if ((c.behaviour.move !== "dead") &&
+             PECK.approx_equals (c.x, position.x, 10) &&
              PECK.approx_equals (c.y+10, position.y, 10))
     {
       return true;
