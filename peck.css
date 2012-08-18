@@ -63,3 +63,11 @@ ul {
   background-color: white;
   color: green;
 }
+
+#instructions {
+  display: none;
+}
+
+.instruction-link {
+  float: right;
+}

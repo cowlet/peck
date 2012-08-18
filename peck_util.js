@@ -39,3 +39,12 @@ PECK.getCursorPosition = function (e) {
     return { "x": x, "y": y };
 };
 
+PECK.show_instructions = function () {
+  document.getElementById("instructions").style.display = "inline";
+  document.getElementById("show-instructions").style.display = "none";
+};
+
+PECK.hide_instructions = function () {
+  document.getElementById("instructions").style.display = "none";
+  document.getElementById("show-instructions").style.display = "inline";
+};

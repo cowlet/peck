@@ -9,7 +9,18 @@
   </head>
   <body onload="PECK.setup();">
 	<div id="peck">
-	    <canvas id="canvas" width="620" height="300"></canvas>
+    <h1>Chicken Farm</h1>
+
+    <p id="show-instructions">
+      <a href="#" class="instruction-link" onclick="PECK.show_instructions();">View instructions</a>
+    </p>
+    <div id="instructions">
+      <h3>How to play</h3>
+      <p>You're running a chicken farm! Try to stay profitable by managing your grain orders and selling eggs or chickens. Make sure your chickens aren't hungry or sad!</p>
+      <p><a href="#" class="instruction-link" id="hide-instructions" onclick="PECK.hide_instructions();">Hide again</a></p>
+    </div>
+
+	  <canvas id="canvas" width="620" height="300"></canvas>
 
 		<div id="chicken-info">
 			<div id="chicken-names">
@@ -43,6 +54,7 @@
         <input type="radio" name="userinput" id="sell" value="sell"><label for="sell" id="sell-label">Sell (+$5)</label>
       </form>
 		</div>
+
 	</div>
   </body>
 </html>
