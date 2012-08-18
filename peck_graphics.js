@@ -115,7 +115,7 @@ PECK.infobar.draw_bar = function (element_name, value) {
   {
     ctx.fillStyle = "red";
   }
-  ctx.fillRect (xmarg, ymarg, graph_length, canvas.height-2*ymarg);
+  ctx.fillRect (xmarg, ymarg, graph_length+1, canvas.height-2*ymarg);
   ctx.fillStyle = "white";
   ctx.fillRect ((xmarg+graph_length), ymarg,
                 (canvas.width - graph_length - 2*xmarg), canvas.height-2*ymarg);
