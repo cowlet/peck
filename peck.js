@@ -294,8 +294,8 @@ PECK.egg_creator = function (n, startx, starty) {
             (PECK.infobar.hour === 6) &&
             (PECK.rand (this.happiness) > 10))
         {
-          PECK.yard.add_chicken (PECK.egg_creator (PECK.yard.unique_name (this.name),
-                                                   this.x, this.y+this.height));
+          var name = prompt("An egg is laid!\nName your egg:", PECK.yard.unique_name (this.name));
+          PECK.yard.add_chicken (PECK.egg_creator (name, this.x, this.y+this.height));
           this.last_lay_day = PECK.infobar.day;
         }
       };
