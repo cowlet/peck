@@ -103,16 +103,23 @@ PECK.infobar.set_chicken_row = function (c) {
     cell = row.insertCell (4);
     cell.setAttribute ("id", c.name+"-sell");
     cell.setAttribute ("class", "sell-text");
-    cell.innerHTML = "<a href=\"#\" id=\"sell-" + c.name + "\" onclick=\"PECK.sell_direct('" + c.name+ "');\">+$" + c.sells_for + "</a>";
+    cell.innerHTML = "<a href=\"#\" id=\"sell-" + c.name + "\" class=\"sell-link\" onclick=\"PECK.sell_direct('" + c.name+ "');\">+$" + c.sells_for + "</a>";
   }
   else
   {
     document.getElementById (c.name+"-act").innerText = c.behaviour.move;
-    document.getElementById ("sell-" + c.name).innerText = "+$" + c.sells_for;
-    if (c.sells_for === 0)
+    if (c.sells_for > 0)
     {
+      document.getElementById ("sell-" + c.name).innerText = "+$" + c.sells_for;
+    }
+    else if (document.getElementById("sell-" + c.name) !== null)
+    {
+      /* The cell should no longer contain an <a> to sell the chicken */
+      var cell = document.getElementById(c.name + "-sell");
+      cell.innerText = "+$0";
       cell.removeAttribute ("class");
     }
+    // else, sells for 0 and link is already removed
   }
 };
 

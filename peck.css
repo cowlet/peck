@@ -68,6 +68,10 @@ table {
   color: green;
 }
 
+a.sell-link {
+  color: green;
+}
+
 #instructions {
   display: none;
 }
