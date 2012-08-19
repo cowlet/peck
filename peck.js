@@ -128,11 +128,14 @@ PECK.egg_creator = function (n, startx, starty) {
     satiation: 100,
     happiness: 100,
     health: 5,
-    sells_for: 10,
     behaviour: { move: "egg" },
     time_to_update: 0,
     birthday: PECK.infobar.day,
     birthhour: PECK.infobar.hour,
+
+    sells_for: function () {
+      return Math.floor(this.happiness/10);
+    },
 
     // An egg isn't interested in grain!
     start_chase: function () {
@@ -173,7 +176,6 @@ PECK.egg_creator = function (n, startx, starty) {
       this.frame = 0;
       this.chasing = false;
       this.last_lay_day = PECK.infobar.day; // don't lay first day
-      this.sells_for = 5;
       
       // Swap to the more complex chicken behaviour
       this.behaviour = {
@@ -323,7 +325,6 @@ PECK.egg_creator = function (n, startx, starty) {
           this.behaviour = { move: "dead" };
           this.happiness = 0;
           this.satiation = 0;
-          this.sells_for = 0;
           this.update_tasks = function () { };
 
           // Prevent zombie chickens from chasing grain

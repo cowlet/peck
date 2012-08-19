@@ -103,14 +103,14 @@ PECK.infobar.set_chicken_row = function (c) {
     cell = row.insertCell (4);
     cell.setAttribute ("id", c.name+"-sell");
     cell.setAttribute ("class", "sell-text");
-    cell.innerHTML = "<a href=\"#\" id=\"sell-" + c.name + "\" class=\"sell-link\" onclick=\"PECK.sell_direct('" + c.name+ "');\">+$" + c.sells_for + "</a>";
+    cell.innerHTML = "<a href=\"#\" id=\"sell-" + c.name + "\" class=\"sell-link\" onclick=\"PECK.sell_direct('" + c.name+ "');\">+$" + c.sells_for () + "</a>";
   }
   else
   {
     document.getElementById (c.name+"-act").innerText = c.behaviour.move;
-    if (c.sells_for > 0)
+    if (c.sells_for () > 0)
     {
-      document.getElementById ("sell-" + c.name).innerText = "+$" + c.sells_for;
+      document.getElementById ("sell-" + c.name).innerText = "+$" + c.sells_for ();
     }
     else if (document.getElementById("sell-" + c.name) !== null)
     {
@@ -391,6 +391,11 @@ PECK.GFX.draw_grave = function (c) {
   PECK.GFX.ctx.fill();
 
   PECK.GFX.ctx.fillRect (c.x-10, c.y-1, 20, 15);
+
+  PECK.GFX.ctx.fillStyle = "white";
+  PECK.GFX.ctx.font = "9px sans-serif";
+  PECK.GFX.ctx.textBaseline = "top";
+  PECK.GFX.ctx.fillText("RIP", c.x-8, c.y-2);
 };
 
 /*** Mouse events ***/
@@ -467,7 +472,7 @@ PECK.sell_direct = function (name) {
 };
 
 PECK.remove_chicken = function (c) {
-  PECK.infobar.money += c.sells_for;
+  PECK.infobar.money += c.sells_for ();
   PECK.yard.chickens.splice (PECK.yard.chickens.indexOf (c), 1);
   var tablerow = document.getElementById (c.name + "-row");
   tablerow.parentNode.removeChild (tablerow);
