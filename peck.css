@@ -23,31 +23,17 @@
 	border: 1px solid;
 }
 
-/* chicken-info is split into names, actions, happiness, satiation, sell */
-#chicken-names {
-	float: left;
-	width: 120px;
+.chicken-name {
   text-align: left;
-}
-
-#chicken-actions {
-	float: left;
-	width: 80px;
-}
-
-#chicken-satiation {
-	float: left;
-	width: 100px;
-}
-
-#chicken-happiness {
-  float: left;
   width: 100px;
 }
 
-#chicken-sell {
-  float: right;
-  width: 28px;
+.chicken-action {
+  width: 100px;
+}
+
+table {
+	font: 12px "Helvetica", sans-serif;
 }
 
 /* farm-info contains mouse and time */
@@ -58,12 +44,6 @@
 
 #time {
   float: right;
-}
-
-ul {
-  list-style-type: none;
-  padding: 0px;
-  margin: 0px;
 }
 
 .bar {

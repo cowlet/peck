@@ -65,36 +65,54 @@ PECK.infobar.y_indent = 20;
 PECK.infobar.x_columns = [15, 100, 200, 360];
 
 PECK.infobar.draw = function (chickens) {
-  names_html = "";
-  actions_html = "";
-  sat_html = "";
-  hap_html = "";
-  price_html = "";
-  
   chickens.forEach (function (c) {
-    names_html += ("<li>" + c.name + "</li>");
-    actions_html += ("<li>" + c.behaviour.move + "</li>");
-    sat_html += ("<li><canvas class=\"bar\" id=\"" + c.name +
-                 "-sat\"></canvas></li>");
-    hap_html += ("<li><canvas class=\"bar\" id=\"" + c.name +
-                 "-hap\"></canvas></li>");
-    price_html += ("<li class=\"sell-text\">+$" + c.sells_for + "</li>");
+    PECK.infobar.chicken_row (c);
   });
-  
-  document.getElementById("chicken-names-list").innerHTML = names_html;
-  document.getElementById("chicken-actions-list").innerHTML = actions_html;
-  document.getElementById("chicken-sat-list").innerHTML = sat_html;
-  document.getElementById("chicken-hap-list").innerHTML = hap_html;
-  document.getElementById("chicken-price-list").innerHTML = price_html;
-  
+
   chickens.forEach (function (c) {
-    PECK.infobar.draw_bar (c.name + "-sat", c.satiation);
-    PECK.infobar.draw_bar (c.name + "-hap", c.happiness);
+    PECK.infobar.draw_bar (c.name + "-sat-bar", c.satiation);
+    PECK.infobar.draw_bar (c.name + "-hap-bar", c.happiness);
   });
   
   farm_html = "<p>Day: " + this.day + " Time: " + this.hour + ":00</p><p>Money: $" +
               this.money + "</p>";
   document.getElementById("farm-info-text").innerHTML = farm_html;
+};
+
+PECK.infobar.chicken_row = function (c) {
+  var row = document.getElementById (c.name + "-row");
+  if (row === null)
+  {
+    row = document.getElementById ("chicken-info-body").insertRow(-1);
+    row.setAttribute ("id", c.name+"-row");
+
+    var cell = row.insertCell (0);
+    cell.setAttribute ("id", c.name+"-name");
+    cell.setAttribute ("class", "chicken-name");
+    cell.innerText = c.name;
+    
+    cell = row.insertCell (1);
+    cell.setAttribute ("id", c.name+"-act");
+    cell.setAttribute ("class", "chicken-action");
+    cell.innerText = c.behaviour.move;
+    
+    cell = row.insertCell (2);
+    cell.setAttribute ("id", c.name+"-sat");
+    cell.innerHTML = "<canvas class=\"bar\" id=\"" + c.name + "-sat-bar\"></canvas>";
+    
+    cell = row.insertCell (3);
+    cell.setAttribute ("id", c.name+"-hap");
+    cell.innerHTML = "<canvas class=\"bar\" id=\"" + c.name + "-hap-bar\"></canvas>";
+    
+    cell = row.insertCell (4);
+    cell.setAttribute ("id", c.name+"-sell");
+    cell.innerText = c.sells_for;
+  }
+  else
+  {
+    document.getElementById (c.name+"-act").innerText = c.behaviour.move;
+    document.getElementById (c.name+"-sell").innerText = c.sells_for;
+  }
 };
 
 PECK.infobar.draw_bar = function (element_name, value) {
@@ -433,6 +451,8 @@ PECK.GFX.sellItem = function (position) {
   {
     PECK.infobar.money += clicked[0].sells_for;
     PECK.yard.chickens.splice (PECK.yard.chickens.indexOf (clicked[0]), 1);
+    var tablerow = document.getElementById (clicked[0].name + "-row");
+    tablerow.parentNode.removeChild (tablerow);
   }
 };
 
