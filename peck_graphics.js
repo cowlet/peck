@@ -102,16 +102,13 @@ PECK.infobar.set_chicken_row = function (c) {
     
     cell = row.insertCell (4);
     cell.setAttribute ("id", c.name+"-sell");
-    if (c.sells_for > 0)
-    {
-      cell.setAttribute ("class", "sell-text");
-    }
-    cell.innerText = ("+$" + c.sells_for);
+    cell.setAttribute ("class", "sell-text");
+    cell.innerHTML = "<a href=\"#\" id=\"sell-" + c.name + "\" onclick=\"PECK.sell_direct('" + c.name+ "');\">+$" + c.sells_for + "</a>";
   }
   else
   {
     document.getElementById (c.name+"-act").innerText = c.behaviour.move;
-    document.getElementById (c.name+"-sell").innerText = "+$" + c.sells_for;
+    document.getElementById ("sell-" + c.name).innerText = "+$" + c.sells_for;
     if (c.sells_for === 0)
     {
       cell.removeAttribute ("class");
@@ -402,7 +399,7 @@ PECK.GFX.handleClick = function (e) {
   }
   else if (document.getElementById ("sell").checked)
   {
-    PECK.GFX.sellItem (position);
+    PECK.GFX.sell_item (position);
   }
 };
 
@@ -434,7 +431,7 @@ PECK.GFX.draw_hitbox = function (chicken) {
   }
 };
 
-PECK.GFX.sellItem = function (position) {
+PECK.GFX.sell_item = function (position) {
   // Is the click on something sellable?
   var clicked = PECK.yard.chickens.filter (function (c) {
     if ((c.behaviour.move === "egg") &&
@@ -453,18 +450,20 @@ PECK.GFX.sellItem = function (position) {
 
   if (clicked.length > 0)
   {
-    PECK.infobar.money += clicked[0].sells_for;
-    PECK.yard.chickens.splice (PECK.yard.chickens.indexOf (clicked[0]), 1);
-    var tablerow = document.getElementById (clicked[0].name + "-row");
-    tablerow.parentNode.removeChild (tablerow);
+    PECK.remove_chicken (clicked[0]);
   }
 };
 
-PECK.GFX.sellDirect = function (name) {
-  console.log("Selling chicken " + name);
+PECK.sell_direct = function (name) {
   var chickens = PECK.yard.chickens.filter (function (c) { return (c.name === name); });
-  PECK.infobar.money += chickens[0].sells_for;
-  PECK.yard.chickens.splice (PECK.yard.chickens.indexOf (chickens[0]), 1);
+  PECK.remove_chicken (chickens[0]);
+};
+
+PECK.remove_chicken = function (c) {
+  PECK.infobar.money += c.sells_for;
+  PECK.yard.chickens.splice (PECK.yard.chickens.indexOf (c), 1);
+  var tablerow = document.getElementById (c.name + "-row");
+  tablerow.parentNode.removeChild (tablerow);
 };
 
 
