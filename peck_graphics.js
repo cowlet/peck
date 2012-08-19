@@ -66,20 +66,17 @@ PECK.infobar.x_columns = [15, 100, 200, 360];
 
 PECK.infobar.draw = function (chickens) {
   chickens.forEach (function (c) {
-    PECK.infobar.chicken_row (c);
-  });
-
-  chickens.forEach (function (c) {
+    PECK.infobar.set_chicken_row (c);
     PECK.infobar.draw_bar (c.name + "-sat-bar", c.satiation);
     PECK.infobar.draw_bar (c.name + "-hap-bar", c.happiness);
   });
-  
-  farm_html = "<p>Day: " + this.day + " Time: " + this.hour + ":00</p><p>Money: $" +
-              this.money + "</p>";
+
+  var farm_html = "<p>Day: " + this.day + " Time: " + this.hour + ":00</p><p>Money: $" +
+                  this.money + "</p>";
   document.getElementById("farm-info-text").innerHTML = farm_html;
 };
 
-PECK.infobar.chicken_row = function (c) {
+PECK.infobar.set_chicken_row = function (c) {
   var row = document.getElementById (c.name + "-row");
   if (row === null)
   {
@@ -93,7 +90,6 @@ PECK.infobar.chicken_row = function (c) {
     
     cell = row.insertCell (1);
     cell.setAttribute ("id", c.name+"-act");
-    cell.setAttribute ("class", "chicken-action");
     cell.innerText = c.behaviour.move;
     
     cell = row.insertCell (2);
@@ -106,12 +102,20 @@ PECK.infobar.chicken_row = function (c) {
     
     cell = row.insertCell (4);
     cell.setAttribute ("id", c.name+"-sell");
-    cell.innerText = c.sells_for;
+    if (c.sells_for > 0)
+    {
+      cell.setAttribute ("class", "sell-text");
+    }
+    cell.innerText = ("+$" + c.sells_for);
   }
   else
   {
     document.getElementById (c.name+"-act").innerText = c.behaviour.move;
-    document.getElementById (c.name+"-sell").innerText = c.sells_for;
+    document.getElementById (c.name+"-sell").innerText = "+$" + c.sells_for;
+    if (c.sells_for === 0)
+    {
+      cell.removeAttribute ("class");
+    }
   }
 };
 

@@ -32,8 +32,15 @@
   width: 100px;
 }
 
+.chicken-sell {
+  width: 35px;
+}
+
 table {
 	font: 12px "Helvetica", sans-serif;
+  table-layout: fixed;
+  width: 428px;
+  text-align: center;
 }
 
 /* farm-info contains mouse and time */
