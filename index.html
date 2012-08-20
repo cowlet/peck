@@ -1,0 +1,70 @@
+<html>
+  <head>
+	<meta name="viewport" content="width=device-width, initial-scale=0.5, maximum-scale=1">
+	<script src="peck.js" type="text/javascript"></script>
+	<script src="peck_util.js" type="text/javascript"></script>
+	<script src="peck_graphics.js" type="text/javascript"></script>
+	
+	<link rel="stylesheet" type="text/css" href="peck.css">
+  </head>
+  <body onload="PECK.setup();">
+	<div id="peck">
+    <h1>Chicken Farm</h1>
+
+    <p id="show-instructions">
+      <a href="#" class="instruction-link" onclick="PECK.show_instructions();">View instructions</a>
+    </p>
+    <div id="instructions">
+      <h3>How to play</h3>
+      <p>You're running a chicken farm! Try to stay profitable by managing your grain orders and selling eggs or chickens. Make sure your chickens aren't hungry or sad!</p>
+      <ul>
+        <li>Hunger decreases happiness.</li>
+        <li>Happiness affects resell price.</li>
+        <li>Drop grain to feed chickens.</li>
+        <li>Eggs are laid at 6am if a chicken is happy enough.</li>
+      </ul>
+      <p><a href="#" class="instruction-link" id="hide-instructions" onclick="PECK.hide_instructions();">Hide again</a></p>
+    </div>
+
+	  <canvas id="canvas" width="620" height="300"></canvas>
+
+    <div id="chicken-info">
+      <table id="chicken-info-table">
+        <thead>
+          <tr>
+            <th class="chicken-name">Name</th>
+            <th class="chicken-action">Action</th>
+            <th>Satiation</th>
+            <th>Happiness</th>
+            <th class="chicken-sell">$</th>
+          </tr>
+        </thead>
+        <tbody id="chicken-info-body">
+        </tbody>
+      </table>
+		</div>
+
+		<div id="farm-info">
+			<div id="farm-info-text">
+			</div>
+      <hr>
+      <div id="mouse">
+        <form>
+          <p>Click for:</p>
+          <input type="radio" name="userinput" id="grain" value="grain" checked><label for="grain" class="buy-text">Grain (-$1)</label><br />
+          <input type="radio" name="userinput" id="sell" value="sell"><label for="sell" class="sell-text">Sell (+$)</label>
+        </form>
+      </div>
+      <div id="time">
+        <form>
+          <p>Speed:</p>
+          <input type="radio" name="speed" id="slow" value="slow" checked><label for="slow">Slow</label><br />
+          <input type="radio" name="speed" id="medium" value="medium"><label for="medium">Medium</label><br />
+          <input type="radio" name="speed" id="fast" value="fast"><label for="fast">Fast</label>
+        </form>
+      </div>
+		</div>
+
+	</div>
+  </body>
+</html>

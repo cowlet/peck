@@ -1,0 +1,81 @@
+#peck {
+	font: 12px "Helvetica", sans-serif;
+	width: 620px;
+	margin: 0 auto;
+}
+
+/* Infobar is split into chicken-info and farm-info */
+#chicken-info {
+	float: left;
+	width: 428px;
+	height: 170px;
+	padding: 5px;
+	border: 1px solid;
+	overflow: auto;
+  text-align: center;
+}
+
+#farm-info {
+	float: right;
+	width: 168px;
+	height: 170px;
+	padding: 5px;
+	border: 1px solid;
+}
+
+.chicken-name {
+  text-align: left;
+  width: 100px;
+}
+
+.chicken-action {
+  width: 100px;
+}
+
+.chicken-sell {
+  width: 35px;
+}
+
+table {
+	font: 12px "Helvetica", sans-serif;
+  table-layout: fixed;
+  width: 428px;
+  text-align: center;
+}
+
+/* farm-info contains mouse and time */
+#mouse {
+  float: left;
+  width: 84px;
+}
+
+#time {
+  float: right;
+}
+
+.bar {
+	width: 60px;
+	height: 12px;
+}
+
+.buy-text {
+  background-color: white;
+  color: red;
+}
+
+.sell-text {
+  background-color: white;
+  color: green;
+}
+
+a.sell-link {
+  color: green;
+}
+
+#instructions {
+  display: none;
+}
+
+.instruction-link {
+  float: right;
+}
