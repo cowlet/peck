@@ -363,7 +363,7 @@ PECK.ending = function () {
   }
   else if (PECK.yard.chickens.every (function (c) { return c.behaviour.move === "dead"; }))
   {
-    return ("Game over!\nAll your chickens died!\nYou meanie!");
+    return ("Game over!\nAll your chickens are dead!\nYou meanie!");
   }
   return null;
 };
