@@ -110,7 +110,17 @@ PECK.infobar.set_chicken_row = function (c) {
     document.getElementById (c.name+"-act").innerText = c.behaviour.move;
     if (c.sells_for () > 0)
     {
-      document.getElementById ("sell-" + c.name).innerText = "+$" + c.sells_for ();
+      if (document.getElementById ("sell-" + c.name) === null)
+      {
+        // previously zero and now higher again
+        var cell = document.getElementById(c.name + "-sell");
+        cell.setAttribute ("class", "sell-text");
+        cell.innerHTML = "<a href=\"#\" id=\"sell-" + c.name + "\" class=\"sell-link\" onclick=\"PECK.sell_direct('" + c.name+ "');\">+$" + c.sells_for () + "</a>";
+      }
+      else
+      {
+        document.getElementById ("sell-" + c.name).innerText = "+$" + c.sells_for ();
+      }
     }
     else if (document.getElementById("sell-" + c.name) !== null)
     {
